@@ -1,0 +1,33 @@
+{% extends 'plants/base.html' %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="user-profile">
+    <form method="post" class="user-form">
+      {% csrf_token %}
+      <h2>Edit user data</h2>
+      <p><label>Username:</label> {{ user.username }}</p>
+      <p><label for="id_email">Email:</label>{{ user_form.email }}</p>
+      {% if user_form.email.errors %}
+        <span class="error">{{ user_form.email.errors.0 }}</span>
+      {% endif %}
+      <p><label for="id_first_name">First name:</label>{{ user_form.first_name }}</p>
+      {% if user_form.first_name.errors %}
+        <span class="error">{{ user_form.first_name.errors.0 }}</span>
+      {% endif %}
+      <p><label for="id_last_name">Last name:</label>{{ user_form.last_name }}</p>
+      {% if user_form.last_name.errors %}
+        <span class="error">{{ user_form.last_name.errors.0 }}</span>
+      {% endif %}
+      <p><label for="id_country">Country:</label>{{ location_form.country }}</p>
+      {% if location_form.country.errors %}
+        <span class="error">{{ location_form.country.errors.0 }}</span>
+      {% endif %}
+      <p><label for="id_city">City:</label>{{ location_form.city }}</p>
+      {% if location_form.city.errors %}
+        <span class="error">{{ location_form.city.errors.0 }}</span>
+      {% endif %}
+      <input id="user-form-button" type="submit" value="Update">
+    </form>
+</div>
+{% endblock %}

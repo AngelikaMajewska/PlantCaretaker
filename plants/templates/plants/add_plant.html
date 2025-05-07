@@ -1,0 +1,10 @@
+{% extends 'plants/base.html' %}
+{% block title %}Add plant{% endblock %}
+
+{% block content %}
+  <form method="post" enctype="multipart/form-data" class="add-plant-form">
+    {% csrf_token %}
+    {{ form.as_table}}
+    <input type="submit" value="Submit" class="add-plant-form-button">
+  </form>
+{% endblock %}

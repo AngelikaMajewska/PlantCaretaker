@@ -1,0 +1,120 @@
+{% extends 'plants/base.html' %}
+{% block title %}My {{plant.name}}{% endblock %}
+
+{% block content %}
+<div class="owned-plant-page">
+    <div class="owned-plant-page-intro">
+    </div>
+    <div class="plant-sum-up">
+        <div class="classification">
+                    <div class="owned-plant-details-image">
+                        <img src="{{ plant.image.url }}" alt="{{ plant.name }}" />
+                    </div>
+                    <h1>{{ plant.name }}</h1>  <!-- Odwołanie do plant.name -->
+        </div>
+        <div class="watering">
+            <div class="watering-record">
+                <div class="next-watering">
+                    <h3>Next watering</h3>
+                    {{next_watering| date:"d.m.Y"}}
+                </div>
+                <div class="past-watering">
+                    <h3>Past waterings</h3>
+                    <div class="waterings-list">
+                        {% for watering in waterings %}
+                            <p>{{watering.date | date:"d.m.Y"}} {% if watering.fertiliser %} + fertilizer {% else %} {% endif %}</p>
+                        {% empty %}
+                            <p>No waterings recorded.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="watering-chart">
+                {{ watering_chart|safe }}
+                <div>
+                    <form id="watering-frequency-form" >
+                        <input type="number" name="frequency" step="1" min="1" value="{{watering_frequency}}">
+                        <input type="hidden" name="plant_id" value="{{plant.id}}">
+                        <input type="hidden" name="owner_id" value="{{user.id}}">
+                        <input type="submit" value="Change">
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="usernotes">
+        <h2 class="usernotes-header">Notes</h2>
+        <ul>
+            {% for note in user_notes %}
+            <li>{{note.date| date:"d.m.Y"}} - {{note.note}} </li>
+            {% empty %}
+                <li>No notes</li>
+            {% endfor %}
+        </ul>
+        <div class="add-note-form">
+            <h3>Add a note</h3>
+            <form id="note-form" data-url="{% url 'add-note' %}">
+                {% csrf_token %}
+                <textarea class="note-box" name="note" placeholder="Type your note here."></textarea>
+                <input type="hidden" name="plant_id" value="{{ plant.id }}">
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <button type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+    <div class="diagnosis-box">
+        <h2>Plant diagnosis</h2>
+        <p>To receive a diagnosis regarding the state of this plant, please click the button below. Option to upload a picture will show. Use it, click Diagnose and wait for a pop-up window with comment.</br>After closing the window, the data will automatically be added to the table and chart below.</p>
+        <button class="diagnose-btn" data-plant-id="{{ plant.id }}">Diagnose</button>
+        <div style="display: block">
+                <!-- Modal z formularzem -->
+                <div id="diagnoseModal" style="display:none;">
+                  <form id="diagnoseForm" enctype="multipart/form-data" data-url="{% url 'diagnose-plant' %}">
+                    {% csrf_token %}
+                    <input type="file" name="image" accept="image/*" required>
+                    <input type="hidden" name="plant_id" id="plantIdInput">
+                    <button type="submit">Send for analysis</button>
+                  </form>
+                </div>
+        </div>
+    </div>
+    <div class="ai-rating-container">
+        <h2 class="ai-rating-header">AI ratings</h2>
+        {% if ai_rating %}
+            <div class="ai-ratings-all">
+                <div class="ai-rating">
+                    <table>
+                        <thead>
+                        <tr>
+                            <td>Date</td>
+                            <td>Note</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for rating in ai_rating %}
+                            <tr>
+                                <td style="color:#294529;font-weight: bold">{{rating.date | date:"d.m.Y"}}</td>
+                                <td>{{rating.note}}</td>
+                            </tr>
+                        {% empty %}
+                            <p>No AI ratings.</p>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="plotly-chart">
+                    {{ plotly_chart|safe }}
+                </div>
+            </div>
+        {% else %}
+            <p>No rating in database.</p>
+        {% endif %}
+    </div>
+
+
+
+
+</div>
+{% endblock %}

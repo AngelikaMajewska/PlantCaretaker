@@ -1,0 +1,89 @@
+{% extends 'plants/base.html' %}
+{% block title %}{{ plant.name }}{% endblock %}
+
+{% block content %}
+<div class="plant-detail">
+    <h1>{{ plant.name }}</h1>  <!-- Odwołanie do plant.name -->
+    <div class="plant-specification">
+        <div class="plant-detail-image">
+            {% if plant.image %}
+                <img src="{{ plant.image.url }}" alt="{{ plant.name }}">
+            {% else %}
+                <img src="/static/images/default-plant.png" alt="Default plant image">
+            {% endif %}
+        </div>
+        <div class="plant-detail-description">
+            <p><strong>Perfect spot:</strong> {{ plant.get_light_display }}</p>
+            <p><strong>Soil: </strong>{{ plant.soil.name}}</p>
+            <p><strong>Description: </strong></br>{{ plant.description|safe }}</p>
+        </div>
+    </div>
+    <div class="comment-section">
+        <h2>Comments</h2>
+        <div class="comment-list">
+            {% for comment in page_obj %}
+                <div class="comment">
+                    <div class="comment-header">
+                        <div class="comment-author">
+                            @{{comment.user.username}}
+                        </div>
+                        <div class="comment-date">
+                            {{comment.date| date:"d.m.Y H:i"}}
+                        </div>
+                    </div>
+                    <div class="comment-content">
+                        {{comment.comment }}
+                    </div>
+                </div>
+            {% empty %}
+                <p>No comments.</p>
+            {% endfor %}
+        </div>
+        <div class="pagination">
+            {% if page_obj.paginator.num_pages ==  1 %}
+            {% else %}
+                <span class="step-links">
+                {% if page_obj.has_previous %}
+                    {% if page_obj.previous_page_number == 1 %}
+                        <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+                    {% elif page_obj.previous_page_number == 2 %}
+                        <a href="?page=1">1</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+                    {% else %}
+                        <a href="?page=1">1</a>
+                        <a href="#">...</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+                    {% endif %}
+                {% endif %}
+                </span>
+
+                <span class="current">{{ page_obj.number }}</span>
+
+                <span class="step-links">
+                    {% if page_obj.has_next %}
+                        {% if page_obj.next_page_number == page_obj.paginator.num_pages %}
+                            <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+                        {% elif page_obj.next_page_number == page_obj.paginator.num_pages|add:"-1" %}
+                            <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                        {% else %}
+                            <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+                            <a href="#">...</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                        {% endif %}
+                    {% endif %}
+                </span>
+            {% endif %}
+        </div>
+        <div class="add-comment-form">
+            <form id="comment-form" data-url="{% url 'add-comment' %}">
+                {% csrf_token %}
+                <textarea class="comment-box" name="comment" placeholder="Type your comment here."></textarea>
+                <input type="hidden" name="plant_id" value="{{ plant.id }}">
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <button type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

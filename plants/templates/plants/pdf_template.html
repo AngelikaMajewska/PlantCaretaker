@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Example</title>
+    <style>
+        body { font-family: "Helvetica Neue", sans-serif; margin: 2cm; }
+        h1 { color: #4d532e; margin:0 0 5px 0; font-size: 20px; }
+        .event{ border-radius: 15px; background-color: #e3eabc; margin-bottom: 10px;  padding: 10px; height: fit-content; }
+        .event-header { color: #4d532e;display: flex; flex-direction: row;justify-content: space-between; align-content: flex-start; margin-bottom: 5px;}
+        .event-header h2 {margin:0; font-size: 16px;}
+        .event-header p { margin: 0; font-size: 16px;}
+        .event-header strong , .event-detail strong { color: #4d532e }
+        .event-detail{ font-size: 14px}
+        .event-detail p{ margin: 0}
+        .month{
+            border: 1px solid #909a61;
+            border-radius: 10px;
+            list-style: none;
+            padding: 10px;
+            margin:5px auto;
+        }
+        .month li{
+            margin:2px 0 0;
+        }
+        .month strong{
+            color: #4d532e;
+        }
+        .planned-waterings{
+            width: 100%;
+        }
+    </style>
+</head>
+<body style="width: 100%; margin:0">
+    <div style="width: 100%">
+        <h1>Events of the month</h1>
+        {% for event in events %}
+          <div class="event">
+              <div class="event-header">
+                  <h2>{{event.name}}</h2>
+                  <p><strong>Date:</strong> {{event.date| date:"d.m.Y"}}</p>
+              </div>
+              <div class="event-detail">
+                  <p><strong>Plant:</strong> {% if event.plant %} {{event.plant.name}} {% else %} Unassigned {% endif %}</p>
+                  <p><strong>Description:</strong> {{event.description}}</p>
+              </div>
+          </div>
+          {% empty %}
+            <p>No events added.</p>
+          {% endfor %}
+    </div>
+    <div>
+        <h1>Wishlist</h1>
+        <div class="wishlist">
+            <ul>
+                  {% for plant in wishlist %}
+                    <li>{{ plant.plant.name }}</li>
+                  {% empty %}
+                    <li>No plants added.</li>
+                  {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="planned-waterings">
+        <h1>Planned waterings</h1>
+        <div>
+            <ul>
+                  {% for day, plants in grouped_by_day.items %}
+                    <div class="month">
+                          <li><strong>{{ day }}:</strong>
+                            <ul>
+                              {% for plant in plants %}
+                                <li>{{ plant }}</li>
+                              {% endfor %}
+                            </ul>
+                          </li>
+                    </div>
+                  {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+</body>
+</html>

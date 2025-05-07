@@ -1,0 +1,203 @@
+{% extends 'plants/base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <div class="dashboard-flow">
+        <div class="dashboard">
+            <div class="pending-events">
+                <div class="event-list">
+                    <div class="event-list-header"><h2>Upcoming events</h2> <button id="openModal">+</button></div>
+                    <!-- Modal -->
+                    <div id="eventModal" style="display: none;">
+                        <form id="eventForm" method="post" data-url="{% url 'add-event' %}">
+                            <div id="modalHeader">
+                                <h3>Add event</h3>
+                                <p id="closeModal">&#x166D; </p>
+                            </div>
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="event">
+                            <div class="form-group">
+                                <label for="{{ event_form.plant.id_for_label }}">{{ event_form.plant.label }}</label>
+                                {{ event_form.plant }}
+                                {% if event_form.plant.errors %}
+                                <div class="error">{{ event_form.plant.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ event_form.date.id_for_label }}">{{ event_form.date.label }}</label>
+                                {{ event_form.date }}
+                                {% if event_form.date.errors %}
+                                <div class="error">{{ event_form.date.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ event_form.name.id_for_label }}">{{ event_form.name.label }}</label>
+                                {{ event_form.name }}
+                                {% if event_form.name.errors %}
+                                <div class="error">{{ event_form.name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ event_form.description.id_for_label }}">{{ event_form.description.label }}</label>
+                                {{ event_form.description }}
+                                {% if event_form.description.errors %}
+                                <div class="error">{{ event_form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <button type="submit">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                    {% for event in events %}
+                    <div class="user-event">
+                        <div class="user-event-header">
+                            <div class="user-event-header-section">
+                                <p>{{event.name}}</p>
+                                <p>{{event.date| date:"d.m.Y"}}</p>
+                            </div>
+                            <div class="user-event-header-buttons">
+                                <p class="cancel-event" title="Cancel" data-event-id="{{ event.id }}">&#x20E0;</p>
+                                <p class="finish-event" title="Finish" data-event-id="{{ event.id }}">&#x2713;</p>
+{#                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">#}
+                                <!--                          <a href="#" id="move-event">&#x2192;</a>-->
+                            </div>
+                        </div>
+                        <div class="user-event-details">
+                            <p><strong>Plant:</strong> {% if event.plant %} {{ event.plant.name }} {% else %} Unassigned {% endif %}</p>
+                            <p><strong>Description:</strong> {{ event.description }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>No events added.</p>
+                    {% endfor %}
+                </div>
+                <div class="watering-board">
+                    <div class="event-list-header"><h2>Watering schedule</h2><button id="openWateringModal">+</button></div>
+                    <!-- Modal -->
+                    <div id="wateringModal" style="display: none;">
+                        <form id="wateringForm" method="post">
+                            <div id="wateringModalHeader">
+                                <h3>Add watering</h3>
+                                <p id="wateringCloseModal">&#x166D; </p>
+                            </div>
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="watering">
+                            <div class="form-group">
+                                <label for="{{ watering_form.plant.id_for_label }}">{{ watering_form.plant.label }}</label>
+                                {{ watering_form.plant }}
+                                {% if watering_form.plant.errors %}
+                                <div class="error">{{ watering_form.plant.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ watering_form.fertiliser.id_for_label }}">{{ watering_form.fertiliser.label }}</label>
+                                {{ watering_form.fertiliser }}
+                                {% if watering_form.fertiliser.errors %}
+                                <div class="error">{{ watering_form.fertiliser.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <button type="submit">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                    {% for watering in waterings %}
+                    <div class="next-watering">
+                        <div class="next-watering-details">
+                            <p>{{watering.plant.name}} </p>
+                            <p>{{watering.next_watering| date:"d.m.Y"}}</p>
+                        </div>
+                        <div class="next-watering-controls">
+                            <p class="add-day" title="Remove one day" data-watering-id="{{ watering.id }}" data-days=-1>-1</p>
+                            <p class="watering-done" title="Mark as done" data-watering-id="{{ watering.id }}" data-fertilizer="False">Done</p>
+                            <p class="watering-done" title="Mark as done" data-watering-id="{{ watering.id }}" data-fertilizer="True">Done with fertilizer</p>
+                            <p class="add-day" title="Add one day" data-watering-id="{{ watering.id }}" data-days=1>+1</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    {% endfor %}
+                </div>
+                <div class="event-calendar">
+                    <div class="download-link">
+                        <a href="{% url 'generate-pdf' %}"  target="_blank">Download PDF for current month &#x2B07;</a>
+                    </div>
+                </div>
+
+            </div>
+            <div class="user-plants">
+                <div class="weather-tip">
+                    <h2>Weather tip</h2>
+                    <div class="weather-tip-detail">
+                        <div>
+                             <p>{{weather_tip.city|capfirst}}, {{weather_tip.date| date:"d.m.Y"}}</p>
+                        </div>
+                        <div>
+                            <span title="Weather">&#127785;</span>  {{weather_tip.weather|capfirst}} <span title="Temperature">&#127777;</span>  {{weather_tip.temperature|floatformat:1}}&#8451; <span title="Humidity">&#128167;</span> {{weather_tip.humidity}}%
+                        </div>
+                    </div>
+                    <p class="tip-tip">{{weather_tip.tip}} </p>
+                </div>
+                <div class="owned">
+                    <h2>My plants</h2>
+                    <div class="owned-plants">
+                        {% for plant in owned_plants %}
+                        <div class="user-owned-plant">
+                            <div class="owned-plant-image">{% if plant.plant.image %}
+                                <a href="{% url 'plant-detail' plant.plant.pk %}"><img src="{{ plant.plant.image.url }}" alt="{{ plant.plant.name }}"></a>
+                                {% else %}
+                                <img src="/static/images/default-plant.png" alt="Default plant image">
+                                {% endif %}
+                            </div>
+                            <div class="owned-plant-name"><a href="{% url 'my-plants' plant.plant.pk %}">{{ plant.plant.name }}</a></div>
+                        </div>
+                        {% empty %}
+                        <p>No owned plants added.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="wishlist">
+                    <h2>Wishlist</h2>
+                    <div class="wishlist-plants">
+                        {% for plant in wishlist %}
+                        <div class="wishlist-plant">
+                            <div class="wishlist-plant-image">
+                                {% if plant.plant.image %}
+                                <a href="{% url 'plant-detail' plant.plant.pk %}"><img src="{{ plant.plant.image.url }}" alt="{{ plant.plant.name }}"></a>
+                                {% else %}
+                                <img src="/static/images/default-plant.png" alt="Default plant image">
+                                {% endif %}
+                            </div>
+                            <div class="wishlist-plant-name">
+                                <a href="{% url 'plant-detail' plant.plant.pk %}">{{ plant.plant.name }}</a>
+                                <div class="wishlist-controls">
+                                    <p class="wishlist-bought" title="Got it" data-plant-id="{{ plant.plant.id }}" data-user-id="{{ user.id }}">&#x1F331;</p>
+                                    <p class="wishlist-remove" title="Remove from wishlist" data-plant-id="{{ plant.plant.id }}" data-user-id="{{ user.id }}">&#x20E0;</p>
+{#                                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">#}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p>No plants added.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="random-tips">
+            <h2>Random tips for you</h2>
+            <div class="tips-container">
+                <ul>
+                    {% for tip in tips %}
+                        <li class="tip">{{tip.tip}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

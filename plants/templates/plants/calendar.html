@@ -1,0 +1,53 @@
+{% extends 'plants/base.html' %}
+{% block title %}Add plant{% endblock %}
+
+{% block content %}
+    <div class="calendar-page">
+        <div class="download-link">
+            <a href="{% url 'generate-pdf' %}"  target="_blank">Download this month &#x2B07;</a>
+        </div>
+        <div class="calendar-box">
+            <div id="calendar"></div>
+            <div id="event-list" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+      var calendarEl = document.getElementById('calendar');
+      var eventListEl = document.getElementById('event-list'); // <-- miejsce na listę eventów
+
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        firstDay: 1,
+        events: '/all-events/',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,dayGridWeek'
+        },
+        dateClick: function(info) {
+          // Wyczyszcz listę eventów
+          eventListEl.innerHTML = '';
+
+          // Filtruj eventy z kalendarza dla klikniętej daty
+          var events = calendar.getEvents().filter(event => {
+            return event.startStr === info.dateStr;
+          });
+
+          if (events.length === 0) {
+            eventListEl.innerHTML = '<p>Brak wydarzeń tego dnia.</p>';
+          } else {
+            events.forEach(event => {
+              var eventEl = document.createElement('div');
+              eventEl.textContent = event.title + ' - ' + event.extendedProps.description;
+              eventListEl.appendChild(eventEl);
+            });
+          }
+        }
+      });
+
+      calendar.render();
+    });
+    </script>
+{% endblock %}
