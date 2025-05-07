@@ -279,72 +279,166 @@ footer{
 /* ---------------------------------------------------------- */
 /*                         calendar                           */
 /* ---------------------------------------------------------- */
-.calendar-page{
-    width: 100%;
-    padding:0;
+.calendar-whole{
     display: flex;
-    flex-direction: column;
-}
-.calendar-box{
-    display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: center;
     width: 100%;
-    height: 100%;
-    margin-top:0;
-    padding-top:0;
-}
-#calendar {
-    max-width: 90%;
-    min-width: 65%;
-    margin: 0 auto;
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.event-list{
+
+    overflow-y: scroll;
+    max-height: 600px;
+    min-height: 60%;
+    width: 30%;
+    scroll-margin: 0;
+    scrollbar-width: thin;
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+    margin-right: 20px;
+    padding:10px;
+}
+.event-list-header{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top:0 ;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    background-color: white;
+    color: #3a450a;
+}
+.event-list h2{
+    margin-top:5px;
+    margin-bottom: 5px;
+    padding-left: 5px;
+
+}
+
+.calendar-box{
+    width: 70%;
+    height: 100%;
+}
+#calendar {
+    min-width: 90%;
+    min-height: 60%;
+    max-height: 600px;
     padding: 20px;
+    margin:auto;
     transition: all 0.3s ease;
 }
 /* Styl nagłówka */
 .fc-toolbar-title {
     font-size: 20px;
-    color: #459349; /* ciemnozielony */
+    color: #3a450a; /* ciemnozielony */
     font-weight: bold;
 }
 /* Styl przycisków (Next, Prev, Today) */
 .fc .fc-button {
-    background-color: #7fb381 !important; /* jasna zieleń */
+    background-color: #e7eccf !important; /* jasna zieleń */
     border: none !important;
     margin: 0 2px;
-    color: white !important;
+    color: #3a450a !important;
     border-radius: 6px !important;
     padding: 5px 10px !important;
     transition: background-color 0.3s ease !important;
 }
 .fc .fc-button:hover {
-    background-color: #7ec97f !important; /* ciemniejszy przy hoverze */
+    background-color: #d6dab7 !important; /* ciemniejszy przy hoverze */
 }
 /* Styl dni */
 .fc-daygrid-day {
     background-color: #fdfffd;
 }
 .fc-day-today {
-    background: #d8f3d9 !important; /* dzisiejszy dzień na jasnozielono */
+    background: #d6dab7 !important; /* dzisiejszy dzień na jasnozielono */
 }
 /* Styl wydarzeń */
 .fc-event {
-    background-color: #d1bb00;
+    background-color: #3a450a;
     border: none;
     font-size: 14px;
     padding: 2px 4px;
     border-radius: 4px;
 }
-#event-list{
-    max-width: 70%;
-    min-width: 61.5%;
-    margin: 0 auto 10px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 20px;
+.user-event{
+    padding: 5px;
+    margin-bottom: 5px;
+    border-radius: 10px;
+}
+.user-event-header{
+    margin:0;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #f3f6e1;
+    color: #3a450a;
+    font-weight: bold;
+    max-height: fit-content;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.user-event-header p{
+    margin:0;
+}
+.user-event-header-section{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: center;
+    width:85%;
+}
+.user-event-header-buttons{
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    justify-content:end;
+    width:10%;
+    padding:0;
+
+}
+.user-event-header-buttons p{
+    margin:auto;
+    padding-right: 2px;
+    align-self: center;
+    align-content: center;
+}
+.cancel-event{
+    color: #ac1627;
+    border-radius: 15px;
+    min-width: 20px;
+    text-align: center;
+    padding-bottom: 4px;
+    padding-left: 3px;
+}
+.cancel-event:hover{
+    background-color: #c5d389;
+}
+.finish-event{
+    color: #209f20;
+    border-radius: 15px;
+    min-width: 20px;
+    text-align: center;
+    padding-top: 4px;
+    padding-left: 3px;
+}
+.finish-event p{
+}
+.finish-event:hover{
+    background-color: #c5d389;
+}
+.user-event-details{
+    margin:0;
+    padding:5px;
+}
+.user-event-details p{
+    margin:5px 0;
 }
 /* ---------------------------------------------------------- */
 /*                          catalog                           */
@@ -694,121 +788,114 @@ footer{
 /* ---------------------------------- */
 /*            event list              */
 /* ---------------------------------- */
-.event-list{
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 0 10px 10px 10px;
-    margin-bottom: 30px;
-    margin-top:0;
-    min-height: 400px;
-    max-height: 400px;
-    overflow-y: scroll;
-    scroll-margin: 0;
-    scrollbar-width: thin;
-    scroll-behavior: smooth;
-    scrollbar-gutter: stable;
-}
-.event-list-header{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-top:0 ;
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-    background-color: white;
-    color: #3a450a;
-}
-.event-list h2{
-    margin-top:5px;
-    margin-bottom: 5px;
-    padding-left: 5px;
+/*.event-list{*/
+/*    background-color: white;*/
+/*    border-radius: 10px;*/
+/*    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);*/
+/*    padding: 0 10px 10px 10px;*/
+/*    margin-bottom: 30px;*/
+/*    margin-top:0;*/
+/*    min-height: 400px;*/
+/*    max-height: 400px;*/
+/*    overflow-y: scroll;*/
+/*    scroll-margin: 0;*/
+/*    scrollbar-width: thin;*/
+/*    scroll-behavior: smooth;*/
+/*    scrollbar-gutter: stable;*/
+/*}*/
+/*.event-list-header{*/
+/*    display: flex;*/
+/*    flex-direction: row;*/
+/*    justify-content: space-between;*/
+/*    margin-top:0 ;*/
+/*    position: sticky;*/
+/*    top: 0;*/
+/*    z-index: 5;*/
+/*    padding: 10px;*/
+/*    border-bottom: 1px solid #ccc;*/
+/*    background-color: white;*/
+/*    color: #3a450a;*/
+/*}*/
+/*.event-list h2{*/
+/*    margin-top:5px;*/
+/*    margin-bottom: 5px;*/
+/*    padding-left: 5px;*/
 
-}
-#cancel-event{
-    text-decoration: none;
-    color: #710f0f;
-}
-#finish-event{
-    text-decoration: none;
-    color: #106e10;
-}
-.user-event{
-    padding: 5px;
-    margin-bottom: 5px;
-    border-radius: 10px;
-}
-.user-event-header{
-    margin:0;
-    padding: 5px;
-    border-radius: 5px;
-    background-color: #f3f6e1;
-    color: #3a450a;
-    font-weight: bold;
-    max-height: fit-content;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-}
-.user-event-header p{
-    margin:0;
-}
-.user-event-header-section{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-content: center;
-    width:85%;
-}
-.user-event-header-buttons{
-    display: flex;
-    flex-direction: row;
-    align-content: center;
-    justify-content:end;
-    width:10%;
-    padding:0;
+/*}*/
 
-}
-.user-event-header-buttons p{
-    margin:auto;
-    padding-right: 2px;
-    align-self: center;
-    align-content: center;
-}
-.cancel-event{
-    color: #ac1627;
-    border-radius: 15px;
-    min-width: 20px;
-    text-align: center;
-    padding-bottom: 4px;
-    padding-left: 3px;
-}
-.cancel-event:hover{
-    background-color: #c5d389;
-}
-.finish-event{
-    color: #209f20;
-    border-radius: 15px;
-    min-width: 20px;
-    text-align: center;
-    padding-top: 4px;
-    padding-left: 3px;
-}
-.finish-event p{
-}
-.finish-event:hover{
-    background-color: #c5d389;
-}
-.user-event-details{
-    margin:0;
-    padding:5px;
-}
-.user-event-details p{
-    margin:5px 0;
-}
+/*.user-event{*/
+/*    padding: 5px;*/
+/*    margin-bottom: 5px;*/
+/*    border-radius: 10px;*/
+/*}*/
+/*.user-event-header{*/
+/*    margin:0;*/
+/*    padding: 5px;*/
+/*    border-radius: 5px;*/
+/*    background-color: #f3f6e1;*/
+/*    color: #3a450a;*/
+/*    font-weight: bold;*/
+/*    max-height: fit-content;*/
+/*    display: flex;*/
+/*    flex-direction: row;*/
+/*    justify-content: space-between;*/
+/*}*/
+/*.user-event-header p{*/
+/*    margin:0;*/
+/*}*/
+/*.user-event-header-section{*/
+/*    display: flex;*/
+/*    flex-direction: row;*/
+/*    justify-content: space-between;*/
+/*    align-content: center;*/
+/*    width:85%;*/
+/*}*/
+/*.user-event-header-buttons{*/
+/*    display: flex;*/
+/*    flex-direction: row;*/
+/*    align-content: center;*/
+/*    justify-content:end;*/
+/*    width:10%;*/
+/*    padding:0;*/
+
+/*}*/
+/*.user-event-header-buttons p{*/
+/*    margin:auto;*/
+/*    padding-right: 2px;*/
+/*    align-self: center;*/
+/*    align-content: center;*/
+/*}*/
+/*.cancel-event{*/
+/*    color: #ac1627;*/
+/*    border-radius: 15px;*/
+/*    min-width: 20px;*/
+/*    text-align: center;*/
+/*    padding-bottom: 4px;*/
+/*    padding-left: 3px;*/
+/*}*/
+/*.cancel-event:hover{*/
+/*    background-color: #c5d389;*/
+/*}*/
+/*.finish-event{*/
+/*    color: #209f20;*/
+/*    border-radius: 15px;*/
+/*    min-width: 20px;*/
+/*    text-align: center;*/
+/*    padding-top: 4px;*/
+/*    padding-left: 3px;*/
+/*}*/
+/*.finish-event p{*/
+/*}*/
+/*.finish-event:hover{*/
+/*    background-color: #c5d389;*/
+/*}*/
+/*.user-event-details{*/
+/*    margin:0;*/
+/*    padding:5px;*/
+/*}*/
+/*.user-event-details p{*/
+/*    margin:5px 0;*/
+/*}*/
 
 /* Tło pod modala */
 #eventModal {
@@ -859,7 +946,7 @@ footer{
         transform: translateY(0);
     }
 }
-/* Styl przycisku otwierającego */
+/* Styl przycisku otwierającego - wszystko do przeniesienia do sekcji kalendarz, jeśli wywalę plusa z podlewania */
 #openModal {
     background-color: #e7edbe;
     color: #51572b;
@@ -960,8 +1047,8 @@ footer{
     padding: 0 10px 10px 10px;
     margin-bottom: 30px;
     margin-top:0;
-    min-height: 365px;
-    max-height: 365px;
+    min-height: 545px;
+    max-height: 545px;
     overflow-y: scroll;
     scroll-margin: 0;
     scrollbar-width: thin;
@@ -1298,6 +1385,9 @@ footer{
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding:20px;
     background-color: #f8faea;
+    margin-top:30px;
+    min-height: 190px;
+    max-height: 190px;
 }
 .random-tips h2{
     margin:0;

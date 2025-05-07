@@ -73,6 +73,15 @@ class AddPlantView(FormView):
 class CalendarView(TemplateView):
     template_name = 'plants/calendar.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        # tips=generate_random_tips()
+        context['event_form'] = EventForm(user=user)
+        context['events'] = Event.objects.filter(user=user, is_finished=False).order_by('date')
+        return context
+
+
 def all_events(request):
     events = Event.objects.filter(user=request.user,is_finished=False).select_related('plant').order_by('date')
     event_list = []
@@ -160,9 +169,8 @@ class DashboardView(TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         # tips=generate_random_tips()
-        tips = PlantTips.objects.all().order_by('?')[:3]
+        tips = PlantTips.objects.all().order_by('?')[:2]
         context['tips'] = tips
-        context['event_form'] = EventForm(user=user)
         context['watering_form'] = WateringForm(user=user)
         owned_plants = OwnedPlants.objects.filter(owner=user).select_related('plant')
         context['owned_plants'] = owned_plants
@@ -178,7 +186,6 @@ class DashboardView(TemplateView):
         context['waterings'] = sorted_waterings
 
         context['wishlist'] = WishList.objects.filter(owner=user).select_related('plant')
-        context['events'] = Event.objects.filter(user=user,is_finished=False).order_by('date')
         location=UserLocation.objects.get(user=self.request.user)
         weather_tip = generate_weather_tip(location.city)
         context['weather_tip'] = weather_tip
@@ -251,6 +258,7 @@ def generate_pdf(request, **kwargs):
     wishlist = WishList.objects.filter(owner=request.user).select_related('plant')
     waterings = Watering.objects.filter(user=request.user,next_watering__month=date.today().month).select_related('plant')
     waterings_dict={}
+
     for item in waterings:
         waterings_dict[f'{item.plant.name}'] = [item.next_watering+ timedelta(days=item.plant.watering_frequency * i) for i in range(1,15) if (item.next_watering+ timedelta(days=item.plant.watering_frequency * i)).month == this_month]
 

@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function() {
             e.preventDefault();
             const form = e.target;
             const formData = new FormData(form);
-            const url = form.dataset.url;  // <- POBIERZ URL Z HTML
+            const url = this.dataset.url;
 
             fetch(url, {
                 method: 'POST',
@@ -279,7 +279,7 @@ document.addEventListener("DOMContentLoaded", function() {
             e.preventDefault();
             const formData = new FormData(this);
             const csrfToken = getCSRFToken();
-            const url = form.dataset.url;
+            const url = this.dataset.url;
             if (!csrfToken) return;
             fetch(url, {
                 method: "POST",
@@ -308,7 +308,8 @@ document.addEventListener("DOMContentLoaded", function() {
             const plantId = this.querySelector("input[name=plant_id]").value;
             const userId = this.querySelector("input[name=user_id]").value;
             const csrfToken = getCSRFToken();
-            const url = form.dataset.url;
+            const url = this.dataset.url;
+            console.log(url)
             if (!csrfToken) return;
             fetch(url, {
                 method: "POST",

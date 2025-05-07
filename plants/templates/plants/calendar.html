@@ -2,16 +2,82 @@
 {% block title %}Add plant{% endblock %}
 
 {% block content %}
-    <div class="calendar-page">
-        <div class="download-link">
-            <a href="{% url 'generate-pdf' %}"  target="_blank">Download this month &#x2B07;</a>
+    <div class="calendar-whole">
+        <div class="event-list">
+            <div class="event-list-header"><h2>Upcoming events</h2> <button id="openModal">+</button></div>
+            <!-- Modal -->
+            <div id="eventModal" style="display: none;">
+                <form id="eventForm" method="post" data-url="{% url 'add-event' %}">
+                    <div id="modalHeader">
+                        <h3>Add event</h3>
+                        <p id="closeModal">&#x166D; </p>
+                    </div>
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="event">
+                    <div class="form-group">
+                        <label for="{{ event_form.plant.id_for_label }}">{{ event_form.plant.label }}</label>
+                        {{ event_form.plant }}
+                        {% if event_form.plant.errors %}
+                        <div class="error">{{ event_form.plant.errors }}</div>
+                        {% endif %}
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="{{ event_form.date.id_for_label }}">{{ event_form.date.label }}</label>
+                        {{ event_form.date }}
+                        {% if event_form.date.errors %}
+                        <div class="error">{{ event_form.date.errors }}</div>
+                        {% endif %}
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="{{ event_form.name.id_for_label }}">{{ event_form.name.label }}</label>
+                        {{ event_form.name }}
+                        {% if event_form.name.errors %}
+                        <div class="error">{{ event_form.name.errors }}</div>
+                        {% endif %}
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="{{ event_form.description.id_for_label }}">{{ event_form.description.label }}</label>
+                        {{ event_form.description }}
+                        {% if event_form.description.errors %}
+                        <div class="error">{{ event_form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Save</button>
+                    </div>
+                </form>
+            </div>
+            {% for event in events %}
+            <div class="user-event">
+                <div class="user-event-header">
+                    <div class="user-event-header-section">
+                        <p>{{event.name}}</p>
+                        <p>{{event.date| date:"d.m.Y"}}</p>
+                    </div>
+                    <div class="user-event-header-buttons">
+                        <p class="cancel-event" title="Cancel" data-event-id="{{ event.id }}">&#x20E0;</p>
+                        <p class="finish-event" title="Finish" data-event-id="{{ event.id }}">&#x2713;</p>
+    {#                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">#}
+                        <!--                          <a href="#" id="move-event">&#x2192;</a>-->
+                    </div>
+                </div>
+                <div class="user-event-details">
+                    <p><strong>Plant:</strong> {% if event.plant %} {{ event.plant.name }} {% else %} Unassigned {% endif %}</p>
+                    <p><strong>Description:</strong> {{ event.description }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <p>No events added.</p>
+            {% endfor %}
         </div>
         <div class="calendar-box">
             <div id="calendar"></div>
-            <div id="event-list" style="margin-top: 20px;"></div>
         </div>
     </div>
-
+    
     <script>
       document.addEventListener('DOMContentLoaded', function() {
       var calendarEl = document.getElementById('calendar');
