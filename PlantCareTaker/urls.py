@@ -55,6 +55,7 @@ urlpatterns = [
     path('remove-from-wishlist/', views.remove_from_wishlist, name='remove-from-wishlist'),
     path('change-watering-frequency/',views.change_watering_frequency, name='change-watering-frequency'),
     path('add-comment/', views.add_comment, name='add-comment'),
+    path('generate-plant-pdf/<int:pk>/', views.generate_plant_pdf, name='generate-plant-pdf'),
 ]
 
 if settings.DEBUG:

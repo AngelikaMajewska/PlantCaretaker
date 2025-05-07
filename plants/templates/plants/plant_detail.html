@@ -4,6 +4,9 @@
 {% block content %}
 <div class="plant-detail">
     <h1>{{ plant.name }}</h1>  <!-- Odwołanie do plant.name -->
+    <div class="download-link" >
+        <a href="{% url 'generate-plant-pdf' plant.id %}"  target="_blank">Download PDF with plant description &#x2B07;</a>
+    </div>
     <div class="plant-specification">
         <div class="plant-detail-image">
             {% if plant.image %}

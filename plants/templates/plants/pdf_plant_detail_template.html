@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Example</title>
+    <style>
+        .plant-detail{
+            width: 100%;
+        }
+        .plant-specification{
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            text-wrap: wrap;
+            margin-top:10px;
+        }
+        .plant-detail h1{
+            /*margin:0;*/
+            /*margin-bottom:10px;*/
+            /*padding: 5px;*/
+            color: #363e16;
+            width: 105%;
+            margin:0 -150px;
+            display: flex;
+            flex-direction: row;
+            align-content: center;
+            background-color: #dfef96;
+            border-radius: 0 90px 90px 0;
+            background-position: -70px;
+            padding: 10px 0 10px 150px;
+        }
+        .plant-detail-description{
+            padding: 10px;
+            width: 100%;
+            margin-left: 0;
+            display: flex;
+            flex-direction: column;
+            align-content: center;
+        }
+        .plant-detail-description p{
+            margin:10px;
+        }
+        .plant-detail-description p strong{
+            color: #5b6533;
+            margin:0;
+        }
+        .plant-detail-description ul{
+            margin:0;
+        }
+        .plant-detail{
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body style="width: 100%; margin:0">
+    <div class="plant-detail">
+        <h1>{{ plant.name }}</h1>  <!-- Odwołanie do plant.name -->
+        <div class="plant-detail-description">
+            <p><strong>Perfect spot:</strong> {{ plant.get_light_display }}</p>
+            <p><strong>Soil: </strong>{{ plant.soil.name}}</p>
+            <p><strong>Description: </strong></br>{{ plant.description|safe }}</p>
+        </div>
+    </div>
+</body>
+</html>

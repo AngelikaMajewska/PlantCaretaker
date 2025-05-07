@@ -663,3 +663,20 @@ def add_comment(request):
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
     return JsonResponse({"success": False, "error": "Invalid request method."})
+
+def generate_plant_pdf(request, pk):
+    plant_id = pk
+    plant = Plant.objects.get(pk=plant_id)
+    plant_name = plant.name
+
+    context = {
+        'plant': plant,
+    }
+
+    html_string = render_to_string('plants/pdf_plant_detail_template.html', context)
+    html = HTML(string=html_string)
+    pdf_file = html.write_pdf()
+
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{plant_name}_detail.pdf"'
+    return response
