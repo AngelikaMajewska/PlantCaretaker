@@ -23,11 +23,11 @@ def create_watering(sender, instance, created, **kwargs):
 @receiver(post_save, sender=OwnedPlants)
 def watering_frequency_change(sender, instance, created, **kwargs):
     if not created:
-        # Możesz dodać logikę sprawdzającą, czy to owner_watering_frequency się zmieniło
+        # dodać logikę sprawdzającą, czy to owner_watering_frequency się zmieniło
         owner_id = instance.owner.id
         plant_id = instance.plant.id
         frequency = int(instance.owner_watering_frequency)
         waterings= Watering.objects.filter(user_id=owner_id, plant_id=plant_id).order_by('-date')
         watering = waterings[0]
-        watering.next_watering = datetime.now()+timedelta(days=frequency)
+        watering.next_watering = watering.date+timedelta(days=frequency)
         watering.save()

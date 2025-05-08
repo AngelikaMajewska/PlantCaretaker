@@ -256,25 +256,55 @@ def generate_pdf(request, **kwargs):
     this_month = datetime.today().month
     events = Event.objects.filter(user=request.user, is_finished=False, date__month = this_month).select_related('plant').order_by('date')
     wishlist = WishList.objects.filter(owner=request.user).select_related('plant')
-    waterings = Watering.objects.filter(user=request.user,next_watering__month=date.today().month).select_related('plant')
-    waterings_dict={}
 
-    for item in waterings:
-        waterings_dict[f'{item.plant.name}'] = [item.next_watering+ timedelta(days=item.plant.watering_frequency * i) for i in range(1,15) if (item.next_watering+ timedelta(days=item.plant.watering_frequency * i)).month == this_month]
+    owned_plants = OwnedPlants.objects.filter(owner=request.user).select_related('plant')
+
+    owned = [plant.plant.id for plant in owned_plants]
+
+
+    last_waterings = []
+    for plantid in owned:
+        last = Watering.objects.filter(plant_id=int(plantid), user_id=request.user.id).order_by(
+            '-next_watering').first()
+        last_waterings.append(last)
+
+    waterings_dict = {}
+    for item in last_waterings:
+        if not item:  # Pomijamy None
+            continue
+        plant_name = item.plant.name
+        frequency = item.plant.watering_frequency
+        start_date = item.next_watering
+        # Generuj do przodu 14 terminów (np. co tydzień)
+        future_dates = [
+            start_date + timedelta(days=frequency * i)
+            for i in range(1, 15)
+            if (start_date + timedelta(days=frequency * i)).month == this_month
+        ]
+        waterings_dict[plant_name] = future_dates
+    # sorted_waterings = sorted([w for w in last_waterings if w], key=lambda w: w.next_watering)
+    sorted_waterings = sorted(
+        [(plant, dates) for plant, dates in waterings_dict.items() if dates],
+        key=lambda x: x[1][0]  # sortujemy po pierwszej dacie z listy
+    )
+
 
     from collections import defaultdict
 
     grouped_by_day = defaultdict(list)
 
-    for plant, dates in waterings_dict.items():
-        for d in dates:
-            # Klucz jako np. "May 07"
-            key = d.strftime('%B %d')  # %B - pełna nazwa miesiąca po angielsku, %d - dzień
-            grouped_by_day[key].append(plant)
+    for plant_name, dates in sorted_waterings:
+        if not dates:
+            continue  # pomiń, jeśli nie ma żadnych dat
+        for date in dates:
+            key = date.strftime('%B %d')  # np. "May 07"
+            grouped_by_day[key].append(plant_name)
 
-    # Sortowanie wg daty (wymaga konwersji z powrotem do daty)
-    grouped_by_day = dict(sorted(grouped_by_day.items(), key=lambda x: datetime.strptime(x[0], "%B %d")))
-
+    # Posortuj według daty (konwersja z tekstu do datetime)
+    grouped_by_day = dict(sorted(
+        grouped_by_day.items(),
+        key=lambda x: datetime.strptime(x[0], "%B %d")
+    ))
     context = {
         'events': events,
         'wishlist': wishlist,
@@ -464,6 +494,7 @@ class OwnedPlantDetailView(TemplateView):
         context['watering_chart'] = get_watering_differences(plant_id)
         watering = Watering.objects.filter(user_id=self.request.user.id, plant_id = plant_id).order_by('-date')
         last_watering=watering.order_by('-date').first()
+        context['last_watering'] = last_watering
         if not watering.order_by('-date').first() :
             next_watering=date.today()
         else:

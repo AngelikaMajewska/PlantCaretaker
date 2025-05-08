@@ -12,27 +12,17 @@
                     </div>
                     <h1>{{ plant.name }}</h1>  <!-- Odwołanie do plant.name -->
         </div>
-        <div class="watering">
-            <div class="watering-record">
-                <div class="next-watering">
-                    <h3>Next watering</h3>
-                    {{next_watering| date:"d.m.Y"}}
+        <div class="owned-plant-section">
+            <div class="watering">
+                <div class="owned-watering">
+                    <p><strong>Last watering:</strong> {{  last_watering.date| date:"d.m.Y" }}</p>
+                    <p><strong>Next watering:</strong> {{next_watering| date:"d.m.Y"}} </p>
                 </div>
-                <div class="past-watering">
-                    <h3>Past waterings</h3>
-                    <div class="waterings-list">
-                        {% for watering in waterings %}
-                            <p>{{watering.date | date:"d.m.Y"}} {% if watering.fertiliser %} + fertilizer {% else %} {% endif %}</p>
-                        {% empty %}
-                            <p>No waterings recorded.</p>
-                        {% endfor %}
-                    </div>
+                <div class="watering-chart">
+                    {{ watering_chart|safe }}
                 </div>
-            </div>
-
-            <div class="watering-chart">
-                {{ watering_chart|safe }}
-                <div>
+                <div class="watering-frequency">
+                    <p><strong>Change watering frequency</strong></p>
                     <form id="watering-frequency-form" >
                         <input type="number" name="frequency" step="1" min="1" value="{{watering_frequency}}">
                         <input type="hidden" name="plant_id" value="{{plant.id}}">
@@ -40,28 +30,30 @@
                         <input type="submit" value="Change">
                     </form>
                 </div>
+                
             </div>
-        </div>
-
-    </div>
-    <div class="usernotes">
-        <h2 class="usernotes-header">Notes</h2>
-        <ul>
-            {% for note in user_notes %}
-            <li>{{note.date| date:"d.m.Y"}} - {{note.note}} </li>
-            {% empty %}
-                <li>No notes</li>
-            {% endfor %}
-        </ul>
-        <div class="add-note-form">
-            <h3>Add a note</h3>
-            <form id="note-form" data-url="{% url 'add-note' %}">
-                {% csrf_token %}
-                <textarea class="note-box" name="note" placeholder="Type your note here."></textarea>
-                <input type="hidden" name="plant_id" value="{{ plant.id }}">
-                <input type="hidden" name="user_id" value="{{ user.id }}">
-                <button type="submit">Add</button>
-            </form>
+            <div class="usernotes">
+                <h2 class="usernotes-header">Notes</h2>
+                <div class="usernotes-list">
+                    <ul>
+                        {% for note in user_notes %}
+                            <li>{{note.date| date:"d.m.Y"}} - {{note.note}} </li>
+                            {% empty %}
+                            <li>No notes</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="add-note-form">
+                    <h3>Add a note</h3>
+                    <form id="note-form" data-url="{% url 'add-note' %}">
+                        {% csrf_token %}
+                        <textarea class="note-box" name="note" placeholder="Type your note here."></textarea>
+                        <input type="hidden" name="plant_id" value="{{ plant.id }}">
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <button type="submit">Add</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
     <div class="diagnosis-box">
