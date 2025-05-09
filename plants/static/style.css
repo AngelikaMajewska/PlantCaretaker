@@ -1509,12 +1509,42 @@ footer{
     flex-direction: row;
     align-content: center;
     align-self: center;
+
 }
 .watering-frequency p{
-    margin:0 10px 0 0 ;
+    margin:auto 5px auto 0;
 }
 #watering-frequency-form{
     margin: auto 0;
+}
+#watering-frequency-select{
+    font-size:13px;
+    width: 40px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    margin:auto;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
+#watering-frequency-button{
+    padding: 10px;
+    border:none;
+    background-color: #dfef96;
+    color: #527552;
+    font-weight: bold;
+    width: 150px;
+    align-self: center;
+    margin:2px;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+#watering-frequency-button:hover{
+    background-color: #c2d180;
 }
 .watering-chart{
     width: fit-content;
@@ -1531,12 +1561,12 @@ footer{
     flex-direction: column;
     border-radius: 20px;
     border: 1px solid #cacaca;
-    padding:5px 10px;
+    padding:10px 20px;
     width: 50%;
     margin: 20px 0 10px 10px;
-    height: 400px;
-    max-height: 400px;
-    min-height: 400px;
+    height: 420px;
+    max-height: 420px;
+    min-height: 420px;
 }
 .usernotes h2{
     margin:0;
@@ -1556,7 +1586,6 @@ footer{
 
 .add-note-form{
     align-self: center;
-    margin-top:5px;
 }
 .add-note-form h3{
     margin:0;
@@ -1572,6 +1601,7 @@ footer{
     align-self: center;
     margin:2px;
     border-radius: 10px;
+    transition: background-color 0.3s ease;
 }
 .add-note-form button:hover{
     background-color: #c2d180;
@@ -1628,7 +1658,7 @@ footer{
 }
 .diagnosis-box button{
     align-self: center;
-
+    transition: background-color 0.3s ease;
     padding: 10px;
     border:none;
     background-color: #dfef96;
@@ -1655,46 +1685,39 @@ footer{
     margin:5px auto;
     padding:0;
     height: fit-content;
+    font-family: inherit;
 }
 .custom-file-upload{
     font-size: 14px;
     margin:0 5px;
 }
-#fileInput{
-    align-self: center;
-
-    padding: 10px;
+#fileName{
+    font-size: 16px;
+    margin:0 5px;
+}
+.file-upload-button {
+    display: inline-block;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    font-family: inherit;
+    padding: 5px 10px;
     border:none;
     background-color: #dfef96;
     color: #527552;
     font-weight: bold;
     margin:2px;
     border-radius: 10px;
-    margin-bottom: 10px;
-}
-#fileInput:hover{
-    background-color: #c2d180;
-}
-.file-upload-button {
-    display: inline-block;
-    padding: 10px 16px;
-    background-color: #1976d2;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
-    text-align: center;
-    text-decoration: none;
 }
 
 .file-upload-button:hover {
-    background-color: #1565c0;
+    background-color: #c2d180;
 }
 #diagnoseForm button{
     margin:0;
+    transition: background-color 0.3s ease;
 }
 .ai-plotly-chart{
     height: fit-content;

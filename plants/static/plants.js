@@ -476,4 +476,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
         });
     }
+    const buttonAiForm=document.getElementById("fileInput")
+    if (buttonAiForm){
+        buttonAiForm.addEventListener("change", function () {
+            const fileName = this.files[0]?.name || "No file selected";
+            document.getElementById("fileName").textContent = fileName;
+        });
+    }
 });

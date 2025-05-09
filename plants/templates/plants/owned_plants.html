@@ -24,25 +24,27 @@
                 <div class="watering-frequency">
                     <p><strong>Change watering frequency</strong></p>
                     <form id="watering-frequency-form" >
-                        <input type="number" name="frequency" step="1" min="1" value="{{watering_frequency}}">
+                        <input type="number" id="watering-frequency-select" name="frequency" step="1" min="1" value="{{watering_frequency}}">
                         <input type="hidden" name="plant_id" value="{{plant.id}}">
                         <input type="hidden" name="owner_id" value="{{user.id}}">
-                        <input type="submit" value="Change">
+                        <input type="submit" id="watering-frequency-button" value="Change">
                     </form>
                 </div>
                 
             </div>
             <div class="usernotes">
                 <h2 class="usernotes-header">Notes</h2>
+                <hr style="border:1px solid #cdcdcd; width: 100%">
                 <div class="usernotes-list">
                         {% for note in user_notes %}
                             <h4>{{note.date| date:"d.m.Y"}} </h4>
                             <p>{{note.note}}</p>
-                            <hr style="border:1px solid #cacaca; width: 90%">
+                            <hr style="border:1px solid #dfdfdf; width: 90%">
                             {% empty %}
                             <p>No notes</p>
                         {% endfor %}
                 </div>
+                <hr style="border:1px solid #cdcdcd; width: 100%">
                 <div class="add-note-form">
                     <h3>Add a note</h3>
                     <form id="note-form" data-url="{% url 'add-note' %}">
@@ -67,9 +69,9 @@
                     <div id="diagnoseModal" style="display:none;">
                         <form id="diagnoseForm" enctype="multipart/form-data" data-url="{% url 'diagnose-plant' %}">
                             {% csrf_token %}
-                            <input type="file" name="image" id="fileInput" accept="image/*" required>
+                            <input type="file" name="image" id="fileInput" accept="image/*" required hidden>
                             <label for="fileInput" class="file-upload-button">📷 Choose image</label>
-                            
+                            <span id="fileName">No file selected</span>
                             <input type="hidden" name="plant_id" id="plantIdInput">
                             <button type="submit">Send for analysis</button>
                         </form>
