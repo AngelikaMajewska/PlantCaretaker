@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="plant-detail">
-    <h1>{{ plant.name }}</h1>  <!-- Odwołanie do plant.name -->
+    <h1 class="font-details-color">{{ plant.name }}</h1> 
     <div class="download-link" >
         <a href="{% url 'generate-plant-pdf' plant.id %}"  target="_blank">Download PDF with plant description &#x2B07;</a>
     </div>
@@ -22,7 +22,7 @@
         </div>
     </div>
     <div class="comment-section">
-        <h2>Comments</h2>
+        <h2 class="section-header">Comments</h2>
         <div class="comment-list">
             {% for comment in page_obj %}
                 <div class="comment">
@@ -48,31 +48,31 @@
                 <span class="step-links">
                 {% if page_obj.has_previous %}
                     {% if page_obj.previous_page_number == 1 %}
-                        <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+                        <a class="links-style" href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
                     {% elif page_obj.previous_page_number == 2 %}
-                        <a href="?page=1">1</a>
-                        <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+                        <a class="links-style" href="?page=1">1</a>
+                        <a class="links-style" href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
                     {% else %}
-                        <a href="?page=1">1</a>
-                        <a href="#">...</a>
-                        <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+                        <a class="links-style" href="?page=1">1</a>
+                        <a class="links-style" href="#">...</a>
+                        <a class="links-style" href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
                     {% endif %}
                 {% endif %}
                 </span>
 
                 <span class="current">{{ page_obj.number }}</span>
 
-                <span class="step-links">
+                <span class="step-links links-style">
                     {% if page_obj.has_next %}
                         {% if page_obj.next_page_number == page_obj.paginator.num_pages %}
-                            <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+                            <a class="links-style" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
                         {% elif page_obj.next_page_number == page_obj.paginator.num_pages|add:"-1" %}
-                            <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
-                            <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                            <a class="links-style" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+                            <a class="links-style" href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
                         {% else %}
-                            <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
-                            <a href="#">...</a>
-                            <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                            <a class="links-style" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+                            <a class="links-style" href="#">...</a>
+                            <a class="links-style" href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
                         {% endif %}
                     {% endif %}
                 </span>
@@ -84,7 +84,7 @@
                 <textarea class="comment-box" name="comment" placeholder="Type your comment here."></textarea>
                 <input type="hidden" name="plant_id" value="{{ plant.id }}">
                 <input type="hidden" name="user_id" value="{{ user.id }}">
-                <button type="submit">Add</button>
+                <button type="submit" class="all-buttons big-button font-details-size">Add</button>
             </form>
         </div>
     </div>

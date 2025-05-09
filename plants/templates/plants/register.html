@@ -1,10 +1,10 @@
 {% extends "plants/base.html" %}
-
+{% block title %}Register{% endblock %}
 {% block content %}
-    <div class="registration">
+    <div class="tile-background">
         <div class="register-form-container">
-            <h2>Register</h2>
-            <form class="register-form" method="post">
+            <h2 class="font-details-color">Register</h2>
+            <form class="register-form font-details-color" method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
                 {% if form.errors %}
@@ -19,12 +19,12 @@
                         {% endfor %}
                     </ul>
                 {% endif %}
-              <button type="submit">Register</button>
+              <button type="submit" class="big-button all-buttons font-details-size">Register</button>
             </form>
 
         </div>
         <div class="login-registration" >
-              <p>Already registered? Log in <a href="{% url 'login' %}">here</a></p>
+              <p>Already registered? Log in <a href="{% url 'login' %}" class="links-style">here</a></p>
         </div>
     </div>
 {% endblock %}

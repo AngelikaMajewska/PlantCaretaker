@@ -1,10 +1,10 @@
 {% extends 'plants/base.html' %}
-{% block title %}Add plant{% endblock %}
+{% block title %}Calendar{% endblock %}
 
 {% block content %}
-    <div class="calendar-whole">
-        <div class="event-list">
-            <div class="event-list-header"><h2>Upcoming events</h2> <button id="openModal">+</button></div>
+    <div class="calendar-whole tile-background">
+        <div class="event-list scroll">
+            <div class="event-list-header font-details-color"><h2>Upcoming events</h2> <button id="openModal" class="all-buttons">+</button></div>
             <!-- Modal -->
             <div id="eventModal" style="display: none;">
                 <form id="eventForm" method="post" data-url="{% url 'add-event' %}">
@@ -46,13 +46,13 @@
                         {% endif %}
                     </div>
                     <div class="form-group">
-                        <button type="submit">Save</button>
+                        <button type="submit" class="all-buttons">Save</button>
                     </div>
                 </form>
             </div>
             {% for event in events %}
             <div class="user-event">
-                <div class="user-event-header">
+                <div class="user-event-header font-details-color">
                     <div class="user-event-header-section">
                         <p>{{event.name}}</p>
                         <p>{{event.date| date:"d.m.Y"}}</p>

@@ -15,7 +15,7 @@
                         {% endif %}
                     </div>
                     <div class="plant-name" >
-                        <a href="{% url 'plant-detail' plant.pk %}" data-plant-id="{{ plant.id }}" data-user-id="{{ user.id }}">{{ plant.name }}</a>
+                        <a href="{% url 'plant-detail' plant.pk %}" data-plant-id="{{ plant.id }}" data-user-id="{{ user.id }}" class="font-details-color">{{ plant.name }}</a>
                         <p class="love-icon">
                             {% if user.is_authenticated %}
                                 {% if plant.id in wishlist %}

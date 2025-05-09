@@ -6,36 +6,36 @@
     <div class="owned-plant-page-intro">
     </div>
     <div class="plant-sum-up">
-        <div class="classification">
+        <div class="classification section-header">
                     <div class="owned-plant-details-image">
                         <img src="{{ plant.image.url }}" alt="{{ plant.name }}" />
                     </div>
-                    <h1>{{ plant.name }}</h1>  <!-- Odwołanie do plant.name -->
+                    <h1 class="section-header">{{ plant.name }}</h1>  <!-- Odwołanie do plant.name -->
         </div>
         <div class="owned-plant-section">
-            <div class="watering">
+            <div class="watering tile-background">
                 <div class="owned-watering">
-                    <p><strong>Last watering:</strong> {{  last_watering.date| date:"d.m.Y" }}</p>
-                    <p><strong>Next watering:</strong> {{next_watering| date:"d.m.Y"}} </p>
+                    <p><strong class="header-style">Last watering:</strong> {{  last_watering.date| date:"d.m.Y" }}</p>
+                    <p><strong class="header-style">Next watering:</strong> {{next_watering| date:"d.m.Y"}} </p>
                 </div>
                 <div class="watering-chart">
                     {{ watering_chart|safe }}
                 </div>
                 <div class="watering-frequency">
-                    <p><strong>Change watering frequency</strong></p>
+                    <p><strong class="header-style">Change watering frequency</strong></p>
                     <form id="watering-frequency-form" >
                         <input type="number" id="watering-frequency-select" name="frequency" step="1" min="1" value="{{watering_frequency}}">
                         <input type="hidden" name="plant_id" value="{{plant.id}}">
                         <input type="hidden" name="owner_id" value="{{user.id}}">
-                        <input type="submit" id="watering-frequency-button" value="Change">
+                        <input type="submit" id="watering-frequency-button" class="all-buttons" value="Change">
                     </form>
                 </div>
                 
             </div>
-            <div class="usernotes">
-                <h2 class="usernotes-header">Notes</h2>
+            <div class="usernotes tile-background">
+                <h2 class="usernotes-header section-header">Notes</h2>
                 <hr style="border:1px solid #cdcdcd; width: 100%">
-                <div class="usernotes-list">
+                <div class="usernotes-list scroll">
                         {% for note in user_notes %}
                             <h4>{{note.date| date:"d.m.Y"}} </h4>
                             <p>{{note.note}}</p>
@@ -45,39 +45,40 @@
                         {% endfor %}
                 </div>
                 <hr style="border:1px solid #cdcdcd; width: 100%">
-                <div class="add-note-form">
+                <div class="add-note-form ">
                     <h3>Add a note</h3>
                     <form id="note-form" data-url="{% url 'add-note' %}">
                         {% csrf_token %}
                         <textarea class="note-box" name="note" placeholder="Type your note here."></textarea>
                         <input type="hidden" name="plant_id" value="{{ plant.id }}">
                         <input type="hidden" name="user_id" value="{{ user.id }}">
-                        <button type="submit">Add</button>
+                        <button class="all-buttons big-button" type="submit">Add</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-    <div class="ai-rating-container">
+    <div class="ai-rating-container tile-background">
         <div class="ai-rating-sumup">
             <div class="diagnosis-box">
-                <h3>Plant diagnosis</h3>
-                <p>To receive a diagnosis regarding the state of this plant, please click the button below. Option to upload a picture will show. Use it, click Diagnose and wait for a pop-up window with comment.</br>After closing the window, the data will automatically be added to the table and chart below.</p>
-                <button class="diagnose-btn" data-plant-id="{{ plant.id }}">Diagnose</button>
+                <h3 class="section-header">Plant diagnosis</h3>
+                <p class="font-details-color">To receive a diagnosis regarding the state of this plant, please click the button below. Option to upload a picture will show. Use it, click Diagnose and wait for a pop-up window with comment.</br>After closing the window, the data will automatically be added to the table and chart below.</p>
+                <button class="diagnose-btn all-buttons big-button" data-plant-id="{{ plant.id }}">Diagnose</button>
                 <div style="display: block">
                     <!-- Modal z formularzem -->
                     <div id="diagnoseModal" style="display:none;">
                         <form id="diagnoseForm" enctype="multipart/form-data" data-url="{% url 'diagnose-plant' %}">
                             {% csrf_token %}
                             <input type="file" name="image" id="fileInput" accept="image/*" required hidden>
-                            <label for="fileInput" class="file-upload-button">📷 Choose image</label>
+                            <label for="fileInput" class="file-upload-button all-buttons big-button">📷 Choose image</label>
                             <span id="fileName">No file selected</span>
                             <input type="hidden" name="plant_id" id="plantIdInput">
-                            <button type="submit">Send for analysis</button>
+                            <button class="all-buttons big-button" type="submit">Send for analysis</button>
                         </form>
                     </div>
                 </div>
             </div>
+            <h3 class="section-header rating-history-header">History of ratings</h3>
             <div class="ai-plotly-chart">
                 {{ plotly_chart|safe }}
             </div>

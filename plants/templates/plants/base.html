@@ -30,7 +30,7 @@
     <div class="login-logout">
         {% if not user.is_authenticated %}
             <div class="login">
-                <a class="login-button" href="{% url 'login' %}">Log in</a>
+                <a class="login-button all-buttons" href="{% url 'login' %}">Log in</a>
             </div>
         {% else %}
             <div class="logout">
@@ -38,7 +38,7 @@
                 <div class="logout-form-container">
                     <form class="logout-form" method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
-                        <button class="logout-button" type="submit">Log out</button>
+                        <button class="logout-button all-buttons" type="submit">Log out</button>
                     </form>
                 </div>
             </div>

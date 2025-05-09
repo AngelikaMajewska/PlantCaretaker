@@ -2,9 +2,9 @@
 {% block title %}Add plant{% endblock %}
 
 {% block content %}
-  <form method="post" enctype="multipart/form-data" class="add-plant-form">
+  <form method="post" enctype="multipart/form-data" class="add-plant-form tile-background">
     {% csrf_token %}
     {{ form.as_table}}
-    <input type="submit" value="Submit" class="add-plant-form-button">
+    <input type="submit" value="Submit" class="add-plant-form-button all-buttons big-button">
   </form>
 {% endblock %}

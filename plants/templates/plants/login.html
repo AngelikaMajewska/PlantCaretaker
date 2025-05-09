@@ -1,18 +1,19 @@
 {% extends 'plants/base.html' %}
 {% load static %}
+{%  block title %}Log in{% endblock %}
 
 {% block content %}
-  <div class="login-page">
-    <div class="login-form-container">
-        <h2>Log in</h2>
-        <form class="login-form" method="post">
+  <div class="login-page tile-background">
+    <div class="login-form-container font-details-size">
+        <h2 class="font-details-color">Log in</h2>
+        <form class="login-form font-details-color font-details-size" method="post">
           {% csrf_token %}
           {{ form.as_p }}
-          <button type="submit">Login</button>
+          <button type="submit" class="all-buttons font-details-size big-button">Login</button>
         </form>
     </div>
     <div class="login-registration">
-        <p>You don't have the account? Sign up <a href="{% url 'register' %}">here</a></p>
+        <p>You don't have the account? Sign up <a href="{% url 'register' %}" class="links-style ">here</a></p>
     </div>
   </div>
 

@@ -13,7 +13,7 @@ body{
     background-repeat: no-repeat;
     background-attachment: fixed;
     height: 790px;
-    background-color: rgba(238, 241, 234, 0.51);
+    background-color: #fafbf2;
 }
 /**{*/
 /*    border: 1px solid black;*/
@@ -37,7 +37,7 @@ footer{
     width: 100%;
     align-self: end;
     /*background: #dfef96;*/
-    background-color: rgba(147, 156, 116, 0.78);
+    background-color: #dfef96;
     margin-top: 30px;
 }
 .filler{
@@ -102,49 +102,81 @@ footer{
 .logout-button{
     margin:auto;
     padding: 10px 15px;
-    background-color: #e7eccf;
-    color: #666e38;
+
     border-radius: 10px;
     border: none;
     font-size: 18px;
     font-family: inherit;
 }
-.logout-button:hover{
-    background-color: #d6dab7;
-    color: #666e38;
-}
 .login a{
     text-decoration: none;
     margin:auto;
     padding: 10px 15px;
-    background-color: #dbe1c0;
-    color: #666e38;
     border-radius: 10px;
     border: none;
     font-size: 16px;
     font-family: inherit;
 }
-.login a:hover{
-    background-color: #d2d6ad;
+.all-buttons{
+    background-color: #dfef96;
+    color: #666e38;
+    transition: background-color 0.2s ease;
+    border: none !important;
+}
+.all-buttons:hover{
+    background-color: #cce365;
     color: #666e38;
 }
-/* ---------------------------------------------------------- */
-/*                         login view                         */
-/* ---------------------------------------------------------- */
-.login-page{
+.all-buttons:active{
+    background-color: #829337;
+}
+.tile-background{
     background-color: white;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding: 20px;
     border-radius: 20px;
-
 }
-.login-form-container{
-}
-.login-form-container h2{
+.font-details-color{
     color: #363e16;
 }
+.font-details-size{
+    font-size: 16px;
+    font-family: inherit;
+}
+.links-style{
+    text-decoration: none;
+    color: #96a35d;
+}
+.big-button{
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin:auto;
+}
+.small-button{
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+.scroll{
+    overflow-y: scroll;
+    scroll-margin: 0;
+    scrollbar-width: thin;
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+}
+.header-style{
+    color: #677043;
+    width: 100%;
+    margin:0;
+    text-decoration: none;
+}
+.section-header{
+    color: #677043;
+}
+/* ---------------------------------------------------------- */
+/*                         login view                         */
+/* ---------------------------------------------------------- */
 .login-form{
-    color: #363e16;
     display: flex;
     flex-direction: column;
     align-content: center;
@@ -154,52 +186,14 @@ footer{
     font-size: 16px;
 }
 .login-form input{
-    border:none;
     font-size: 16px;
     border: 1px solid lightgray;
     line-height: 1.5em;
 }
-.login-form button{
-    margin:auto;
-    padding: 10px 15px;
-    border-radius: 10px;
-    border: none;
-    background-color: #e7eccf;
-    font-size: 16px;
-    color: #666e38;
-    font-family: inherit;
-}
-.login-form button:hover{
-    background-color: #d6dab7;
-}
-
-.login-registration{
-
-}
-.login-registration p{
-
-}
-.login-registration a{
-    text-decoration: none;
-    color: #96a35d;
-}
 /* ---------------------------------------------------------- */
 /*                    registration view                       */
 /* ---------------------------------------------------------- */
-.registration{
-    background-color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    border-radius: 20px;
-}
-.register-form-container h2{
-    color: #363e16;
-}
-.errorlist li{
-
-}
 .register-form{
-    color: #363e16;
     display: flex;
     flex-direction: column;
     align-content: center;
@@ -209,21 +203,13 @@ footer{
     font-size: 16px;
 }
 .register-form input{
-    border:none;
     font-size: 16px;
     border: 1px solid lightgray;
     line-height: 1.5em;
 }
 .register-form button{
-    margin:auto;
-    padding: 10px 15px;
-    border-radius: 10px;
-    border: none;
-    background-color: #e7eccf;
-    color: #666e38;
     font-size: 16px;
 }
-
 .helptext {
     display: none;
 }
@@ -237,10 +223,6 @@ footer{
     justify-content: center;
 }
 .user-form{
-    border-radius: 20px;
-    padding:30px 50px;
-    background-color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     width: 500px;
     display: flex;
     flex-direction: column;
@@ -254,24 +236,13 @@ footer{
     justify-content: space-between;
 }
 .form-input{
-    font-size: 18px;
+    font-size: 16px;
     font-family: inherit;
     text-align: right;
 }
 #user-form-button{
-    border-radius: 10px;
-    padding:15px 10px;
-    border: none;
     width: 30%;
     align-self: center;
-    font-size:16px;
-    font-family: inherit;
-    background-color: #e7eccf;
-    color: #666e38;
-}
-#user-form-button:hover{
-    background-color: #d6dab7;
-    color: #666e38;
 }
 .error{
     font-size: 16px;
@@ -286,20 +257,11 @@ footer{
     flex-direction: row;
     justify-content: center;
     width: 100%;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .event-list{
-
-    overflow-y: scroll;
     max-height: 600px;
     min-height: 60%;
     width: 30%;
-    scroll-margin: 0;
-    scrollbar-width: thin;
-    scroll-behavior: smooth;
-    scrollbar-gutter: stable;
     margin-right: 20px;
     padding:10px;
 }
@@ -314,13 +276,11 @@ footer{
     padding: 10px;
     border-bottom: 1px solid #ccc;
     background-color: white;
-    color: #3a450a;
 }
 .event-list h2{
     margin-top:5px;
     margin-bottom: 5px;
     padding-left: 5px;
-
 }
 
 .calendar-box{
@@ -343,17 +303,18 @@ footer{
 }
 /* Styl przycisków (Next, Prev, Today) */
 .fc .fc-button {
-    background-color: #e7eccf !important; /* jasna zieleń */
     border: none !important;
     margin: 0 2px;
-    color: #3a450a !important;
     border-radius: 6px !important;
     padding: 5px 10px !important;
-    transition: background-color 0.3s ease !important;
+    background-color: #dfef96 !important;
+    color: #666e38;
+    transition: background-color 0.2s ease !important;
 }
 .fc .fc-button:hover {
-    background-color: #d6dab7 !important; /* ciemniejszy przy hoverze */
+    background-color: #cce365 !important; /* ciemniejszy przy hoverze */
 }
+
 /* Styl dni */
 .fc-daygrid-day {
     background-color: #fdfffd;
@@ -379,7 +340,6 @@ footer{
     padding: 5px;
     border-radius: 5px;
     background-color: #f3f6e1;
-    color: #3a450a;
     font-weight: bold;
     max-height: fit-content;
     display: flex;
@@ -403,7 +363,6 @@ footer{
     justify-content:end;
     width:10%;
     padding:0;
-
 }
 .user-event-header-buttons p{
     margin:auto;
@@ -458,7 +417,7 @@ footer{
 .plant{
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     width: 200px;
-    height: 280px;
+    height: 300px;
     border-radius: 20px;
     margin:10px auto;
     padding: 5px;
@@ -466,7 +425,6 @@ footer{
     flex-direction: column;
     align-content: center;
     justify-content: center;
-
 }
 .plant-image{
     width: 180px;
@@ -492,21 +450,9 @@ footer{
 }
 .plant-name a{
     text-decoration: none;
-    color: #3a450a;
     align-self: center;
 }
-.love-icon{
-    height: fit-content;
-    font-weight: bold;
-    width: fit-content;
-}
-.love-icon span{
-    height: fit-content;
-    font-weight: bold;
-    width: fit-content;
-    font-size:20px;
-}
-.love-icon-clicked{
+.love-icon, .love-icon span, .love-icon-clicked{
     height: fit-content;
     font-weight: bold;
     width: fit-content;
@@ -516,10 +462,6 @@ footer{
 /*                          add plant                         */
 /* ---------------------------------------------------------- */
 .add-plant-form{
-    border-radius: 20px;
-    background-color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 30px;
     display: flex;
     flex-direction: column;
 }
@@ -553,12 +495,8 @@ footer{
     border-color: #ccc;
 }
 .add-plant-form-button{
-    border-style: none !important;
-    padding: 10px;
     width: 30%;
     align-self: center;
-    background-color: #96c87a;
-    border-radius: 10px;
     margin-top: 20px;
 }
 .add-plant-form select {
@@ -593,10 +531,6 @@ footer{
     margin-top:10px;
 }
 .plant-detail h1{
-    /*margin:0;*/
-    /*margin-bottom:10px;*/
-    /*padding: 5px;*/
-    color: #363e16;
     width: 105%;
     margin:0 -150px;
     display: flex;
@@ -639,18 +573,12 @@ footer{
 .plant-detail-description ul{
     margin:0;
 }
-.plant-detail{
-    display: flex;
-    flex-direction: column;
-}
-.comment-section{
+.plant-detail, .comment-section{
     display: flex;
     flex-direction: column;
 }
 .comment-section h2{
-    color: #677043;
     width: 100%;
-    margin:0;
 }
 .comment-list{
     margin:0 0 10px 0;
@@ -688,8 +616,6 @@ footer{
     margin: 0 2px;
 }
 .step-links a{
-    text-decoration: none;
-    color: #3a450a;
     margin: 0 2px;
 }
 .current{
@@ -723,16 +649,8 @@ footer{
     font-size: inherit;
     font-family: inherit;
     margin:5px 0 0 0;
-    padding: 10px;
-    border: none;
-    background-color: #f3f6e1;
-    color: #666e38;
-    border-radius: 10px;
 }
-#comment-form button:hover{
-    background-color: #e4e8c5;
-    color: #666e38;
-}
+
 /* ---------------------------------------------------------- */
 /*                          dashboard                         */
 /* ---------------------------------------------------------- */
@@ -771,24 +689,14 @@ footer{
     height: fit-content;
 }
 
-/*.event-calendar{*/
-/*    background-color: #f8faea;*/
-/*}*/
-.event-calendar{
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-}
 .download-link{
     margin:0;
     display: flex;
     align-self: end;
     justify-content: center;
     align-content: center;
-    height: 40px;
+    height: 30px;
     padding: 0;
-
 }
 .download-link a{
     text-decoration: none;
@@ -800,115 +708,6 @@ footer{
 /* ---------------------------------- */
 /*            event list              */
 /* ---------------------------------- */
-/*.event-list{*/
-/*    background-color: white;*/
-/*    border-radius: 10px;*/
-/*    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);*/
-/*    padding: 0 10px 10px 10px;*/
-/*    margin-bottom: 30px;*/
-/*    margin-top:0;*/
-/*    min-height: 400px;*/
-/*    max-height: 400px;*/
-/*    overflow-y: scroll;*/
-/*    scroll-margin: 0;*/
-/*    scrollbar-width: thin;*/
-/*    scroll-behavior: smooth;*/
-/*    scrollbar-gutter: stable;*/
-/*}*/
-/*.event-list-header{*/
-/*    display: flex;*/
-/*    flex-direction: row;*/
-/*    justify-content: space-between;*/
-/*    margin-top:0 ;*/
-/*    position: sticky;*/
-/*    top: 0;*/
-/*    z-index: 5;*/
-/*    padding: 10px;*/
-/*    border-bottom: 1px solid #ccc;*/
-/*    background-color: white;*/
-/*    color: #3a450a;*/
-/*}*/
-/*.event-list h2{*/
-/*    margin-top:5px;*/
-/*    margin-bottom: 5px;*/
-/*    padding-left: 5px;*/
-
-/*}*/
-
-/*.user-event{*/
-/*    padding: 5px;*/
-/*    margin-bottom: 5px;*/
-/*    border-radius: 10px;*/
-/*}*/
-/*.user-event-header{*/
-/*    margin:0;*/
-/*    padding: 5px;*/
-/*    border-radius: 5px;*/
-/*    background-color: #f3f6e1;*/
-/*    color: #3a450a;*/
-/*    font-weight: bold;*/
-/*    max-height: fit-content;*/
-/*    display: flex;*/
-/*    flex-direction: row;*/
-/*    justify-content: space-between;*/
-/*}*/
-/*.user-event-header p{*/
-/*    margin:0;*/
-/*}*/
-/*.user-event-header-section{*/
-/*    display: flex;*/
-/*    flex-direction: row;*/
-/*    justify-content: space-between;*/
-/*    align-content: center;*/
-/*    width:85%;*/
-/*}*/
-/*.user-event-header-buttons{*/
-/*    display: flex;*/
-/*    flex-direction: row;*/
-/*    align-content: center;*/
-/*    justify-content:end;*/
-/*    width:10%;*/
-/*    padding:0;*/
-
-/*}*/
-/*.user-event-header-buttons p{*/
-/*    margin:auto;*/
-/*    padding-right: 2px;*/
-/*    align-self: center;*/
-/*    align-content: center;*/
-/*}*/
-/*.cancel-event{*/
-/*    color: #ac1627;*/
-/*    border-radius: 15px;*/
-/*    min-width: 20px;*/
-/*    text-align: center;*/
-/*    padding-bottom: 4px;*/
-/*    padding-left: 3px;*/
-/*}*/
-/*.cancel-event:hover{*/
-/*    background-color: #c5d389;*/
-/*}*/
-/*.finish-event{*/
-/*    color: #209f20;*/
-/*    border-radius: 15px;*/
-/*    min-width: 20px;*/
-/*    text-align: center;*/
-/*    padding-top: 4px;*/
-/*    padding-left: 3px;*/
-/*}*/
-/*.finish-event p{*/
-/*}*/
-/*.finish-event:hover{*/
-/*    background-color: #c5d389;*/
-/*}*/
-/*.user-event-details{*/
-/*    margin:0;*/
-/*    padding:5px;*/
-/*}*/
-/*.user-event-details p{*/
-/*    margin:5px 0;*/
-/*}*/
-
 /* Tło pod modala */
 #eventModal {
     position: fixed;
@@ -937,15 +736,9 @@ footer{
 #eventForm button{
     padding: 10px;
     border: none;
-    background-color: #f3f6e1;
-    color: #5c613e;
     border-radius: 5px;
     justify-self: center;
     margin-top:10px;
-}
-#eventForm button:hover{
-    background-color: #d3daaa;
-    color: #5c613e;
 }
 /* Animacja wchodzenia modala */
 @keyframes fadeIn {
@@ -960,17 +753,12 @@ footer{
 }
 /* Styl przycisku otwierającego - wszystko do przeniesienia do sekcji kalendarz, jeśli wywalę plusa z podlewania */
 #openModal {
-    background-color: #e7edbe;
-    color: #51572b;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     height: 25px;
     margin: auto 0;
     padding: 5px 10px;
-}
-#openModal:hover {
-    background-color: #b5bd80;
 }
 #modalHeader{
     display: flex;
@@ -1021,9 +809,6 @@ footer{
 /*            weather tip             */
 /* ---------------------------------- */
 .weather-tip{
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding: 0 10px 10px 10px;
     margin-bottom: 20px;
     height: fit-content;
@@ -1033,7 +818,6 @@ footer{
 .weather-tip h2{
     margin:0;
     padding-top:10px;
-    color: #3a450a;
     width: 100%;
     text-align: center;
 }
@@ -1053,21 +837,14 @@ footer{
 /*             watering               */
 /* ---------------------------------- */
 .watering-board{
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding: 0 10px 10px 10px;
     margin-bottom: 20px;
     margin-top:0;
     min-height: 565px;
     max-height: 565px;
-    overflow-y: scroll;
     scroll-margin: 0;
-    scrollbar-width: thin;
-    scroll-behavior: smooth;
-    scrollbar-gutter: stable;
 }
-.watering-board .event-list-header{
+.watering-schedule-header{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -1078,12 +855,9 @@ footer{
     padding: 10px;
     border-bottom: 1px solid #ccc;
     background-color: white;
-    color: #3a450a;
 }
 .watering-board h2{
     margin:0;
-    color: #3a450a;
-    background-color: white;
 }
 
 /* Tło pod modala */
@@ -1114,15 +888,9 @@ footer{
 #wateringForm button{
     padding: 10px;
     border: none;
-    background-color: #f3f6e1;
-    color: #666e38;
     border-radius: 5px;
     justify-self: center;
     margin-top:10px;
-}
-#wateringForm button:hover{
-    background-color: #e4e8c5;
-    color: #666e38;
 }
 /* Animacja wchodzenia modala */
 @keyframes fadeIn {
@@ -1137,17 +905,9 @@ footer{
 }
 /* Styl przycisku otwierającego */
 #openWateringModal {
-    background-color: #e7edbe;
-    color: #51572b;
-    border: none;
-    border-radius: 5px;
     cursor: pointer;
     height: 25px;
     margin: auto 0;
-    padding: 5px 10px;
-}
-#openWateringModal:hover {
-    background-color: #ced698;
 }
 #wateringModalHeader{
     display: flex;
@@ -1157,10 +917,7 @@ footer{
     height: fit-content;
     max-height: fit-content;
 }
-#wateringModalHeader h3{
-    margin:0;
-}
-#wateringModalHeader p{
+#wateringModalHeader h3, #wateringModalHeader p{
     margin:0;
 }
 #wateringCloseModal{
@@ -1193,7 +950,6 @@ footer{
 .next-watering-details p{
     margin:5px 0;
     font-size: 18px;
-    color: #3f4323;
 }
 .next-watering-controls{
     display: flex;
@@ -1207,23 +963,10 @@ footer{
 .next-watering-controls p{
     padding: 5px 10px;
     font-size: 14px;
-    background-color: rgba(193, 200, 141, 0.57);
     margin: 0 1px;
     border-radius: 3px;
-    color: #7d8551;
 }
-.next-watering-controls p:hover{
-    background-color: #ced698;
-}
-.next-watering-controls p:active{
-    background-color: #ddd264;
-}
-.add-day{
-    color: #b8c13e;
-    font-weight: bold;
-}
-.watering-done{
-    color: green;
+.add-day, .watering-done{
     font-weight: bold;
 }
 /* ---------------------------------- */
@@ -1232,17 +975,12 @@ footer{
 .owned{
     display: flex;
     flex-direction: column;
-    padding: 10px;
-    background-color: white;
     margin-top:0;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .owned h2{
     width: 100%;
     text-align: center;
     margin-top:5px;
-    color: #3a450a;
     margin-bottom: 5px;
 }
 .owned-plants{
@@ -1253,11 +991,6 @@ footer{
     flex-wrap: wrap;
     gap: 20px;
     height:300px;
-    overflow: scroll;
-    scroll-margin: 0;
-    scrollbar-width: thin;
-    scroll-behavior: smooth;
-    scrollbar-gutter: stable;
 }
 .user-owned-plant{
     height: 60px;
@@ -1290,28 +1023,18 @@ footer{
     margin-top:0;
     align-self: center;
 }
-.owned-plant-name a{
-    margin: 0;
-    text-decoration: none;
-    color: #363e16;
-}
 /* ---------------------------------- */
 /*              wishlist              */
 /* ---------------------------------- */
 .wishlist{
     display: flex;
     flex-direction: column;
-    padding: 10px;
-    background-color: white;
     margin-top:20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .wishlist h2{
     width: 100%;
     text-align: center;
     margin-top:5px;
-    color: #3a450a;
     margin-bottom: 0;
 }
 .wishlist-plants{
@@ -1320,12 +1043,6 @@ footer{
     flex-wrap: wrap;
     margin-top:0;
     height: 300px;
-    overflow: scroll;
-    scroll-margin: 0;
-    scrollbar-width: thin;
-    scroll-behavior: smooth;
-    scrollbar-gutter: inherit;
-    scroll-padding: 0;
 }
 .wishlist-plant{
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -1402,18 +1119,12 @@ footer{
 /*            random tips             */
 /* ---------------------------------- */
 .random-tips{
-    border-radius: 10px;
-    /*background-color: white;*/
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding:20px;
-    background-color: white;
     margin-top:20px;
     min-height: 190px;
     max-height: 190px;
 }
 .random-tips h2{
     margin:0;
-    color: #3a450a;
 }
 .tip{
     font-size: 18px;
@@ -1447,7 +1158,6 @@ footer{
     margin:0;
     align-self: center;
     padding-left: 20px;
-    color: #234525;
 }
 .owned-plant-details-image{
     max-width: 150px;
@@ -1464,7 +1174,6 @@ footer{
     margin:auto;
     object-fit: cover; /* najważniejsze! */
 }
-
 .owned-plant-section{
     display: flex;
     flex-direction: row;
@@ -1475,9 +1184,6 @@ footer{
     flex-direction: column;
     justify-content: center;
     align-content: center;
-    border: 1px solid #cacaca;
-    border-radius: 20px;
-    padding: 10px ;
     width: 50%;
 }
 .owned-watering{
@@ -1532,19 +1238,10 @@ footer{
 
 }
 #watering-frequency-button{
-    padding: 10px;
-    border:none;
-    background-color: #dfef96;
-    color: #527552;
     font-weight: bold;
     width: 150px;
     align-self: center;
     margin:2px;
-    border-radius: 10px;
-    transition: background-color 0.3s ease;
-}
-#watering-frequency-button:hover{
-    background-color: #c2d180;
 }
 .watering-chart{
     width: fit-content;
@@ -1559,9 +1256,6 @@ footer{
 .usernotes{
     display: flex;
     flex-direction: column;
-    border-radius: 20px;
-    border: 1px solid #cacaca;
-    padding:10px 20px;
     width: 50%;
     margin: 20px 0 10px 10px;
     height: 420px;
@@ -1575,7 +1269,6 @@ footer{
     height: 200px;
     max-height: 200px;
     min-height: 200px;
-    overflow: scroll;
 }
 .usernotes-list h4{
     margin: 10px 0 5px 0;
@@ -1583,7 +1276,6 @@ footer{
 .usernotes-list p{
     margin: 0 0 5px 20px;
 }
-
 .add-note-form{
     align-self: center;
 }
@@ -1592,19 +1284,9 @@ footer{
     color: grey;
 }
 .add-note-form button{
-    padding: 10px;
-    border:none;
-    background-color: #dfef96;
-    color: #527552;
     font-weight: bold;
     width: 150px;
-    align-self: center;
     margin:2px;
-    border-radius: 10px;
-    transition: background-color 0.3s ease;
-}
-.add-note-form button:hover{
-    background-color: #c2d180;
 }
 #note-form{
     display: flex;
@@ -1621,11 +1303,7 @@ footer{
     padding:5px;
     resize: none;
 }
-
-
 .ai-rating-container{
-    border-radius: 10px;
-    border: 1px solid #cacaca;
     margin-top:20px;
     margin-bottom:20px;
     display: flex;
@@ -1647,30 +1325,21 @@ footer{
     border-radius: 10px;
     padding:10px;
 }
+.diagnose-btn{
+    align-self: center;
+}
 .diagnosis-box p{
     align-self: center;
-    color: #527552;
-    text-align: center;
+    text-align: left;
     margin-top:5px;
 }
 .diagnosis-box h3{
     margin:0;
 }
 .diagnosis-box button{
-    align-self: center;
-    transition: background-color 0.3s ease;
-    padding: 10px;
-    border:none;
-    background-color: #dfef96;
-    color: #527552;
     font-weight: bold;
     width: 150px;
-    margin:2px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-}
-.diagnosis-box button:hover{
-    background-color: #c2d180;
+    margin:2px 2px 10px 2px;
 }
 #diagnoseModal{
     border: 1px solid #cacaca;
@@ -1699,30 +1368,25 @@ footer{
     display: inline-block;
     cursor: pointer;
     font-size: 14px;
-    transition: background-color 0.3s ease;
     text-align: center;
     text-decoration: none;
     font-family: inherit;
     padding: 5px 10px;
     border:none;
-    background-color: #dfef96;
-    color: #527552;
     font-weight: bold;
     margin:2px;
     border-radius: 10px;
 }
-
-.file-upload-button:hover {
-    background-color: #c2d180;
-}
 #diagnoseForm button{
     margin:0;
-    transition: background-color 0.3s ease;
+}
+.rating-history-header{
+    margin:0;
 }
 .ai-plotly-chart{
     height: fit-content;
-    padding:10px;
-    margin:auto;
+    padding:0;
+    margin:0 auto;
 }
 .ai-rating-notes{
     display: flex;
