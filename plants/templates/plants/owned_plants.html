@@ -35,13 +35,13 @@
             <div class="usernotes">
                 <h2 class="usernotes-header">Notes</h2>
                 <div class="usernotes-list">
-                    <ul>
                         {% for note in user_notes %}
-                            <li>{{note.date| date:"d.m.Y"}} - {{note.note}} </li>
+                            <h4>{{note.date| date:"d.m.Y"}} </h4>
+                            <p>{{note.note}}</p>
+                            <hr style="border:1px solid #cacaca; width: 90%">
                             {% empty %}
-                            <li>No notes</li>
+                            <p>No notes</p>
                         {% endfor %}
-                    </ul>
                 </div>
                 <div class="add-note-form">
                     <h3>Add a note</h3>
@@ -56,53 +56,60 @@
             </div>
         </div>
     </div>
-    <div class="diagnosis-box">
-        <h2>Plant diagnosis</h2>
-        <p>To receive a diagnosis regarding the state of this plant, please click the button below. Option to upload a picture will show. Use it, click Diagnose and wait for a pop-up window with comment.</br>After closing the window, the data will automatically be added to the table and chart below.</p>
-        <button class="diagnose-btn" data-plant-id="{{ plant.id }}">Diagnose</button>
-        <div style="display: block">
-                <!-- Modal z formularzem -->
-                <div id="diagnoseModal" style="display:none;">
-                  <form id="diagnoseForm" enctype="multipart/form-data" data-url="{% url 'diagnose-plant' %}">
-                    {% csrf_token %}
-                    <input type="file" name="image" accept="image/*" required>
-                    <input type="hidden" name="plant_id" id="plantIdInput">
-                    <button type="submit">Send for analysis</button>
-                  </form>
-                </div>
-        </div>
-    </div>
     <div class="ai-rating-container">
-        <h2 class="ai-rating-header">AI ratings</h2>
-        {% if ai_rating %}
-            <div class="ai-ratings-all">
-                <div class="ai-rating">
-                    <table>
-                        <thead>
-                        <tr>
-                            <td>Date</td>
-                            <td>Note</td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for rating in ai_rating %}
-                            <tr>
-                                <td style="color:#294529;font-weight: bold">{{rating.date | date:"d.m.Y"}}</td>
-                                <td>{{rating.note}}</td>
-                            </tr>
-                        {% empty %}
-                            <p>No AI ratings.</p>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="plotly-chart">
-                    {{ plotly_chart|safe }}
+        <div class="ai-rating-sumup">
+            <div class="diagnosis-box">
+                <h3>Plant diagnosis</h3>
+                <p>To receive a diagnosis regarding the state of this plant, please click the button below. Option to upload a picture will show. Use it, click Diagnose and wait for a pop-up window with comment.</br>After closing the window, the data will automatically be added to the table and chart below.</p>
+                <button class="diagnose-btn" data-plant-id="{{ plant.id }}">Diagnose</button>
+                <div style="display: block">
+                    <!-- Modal z formularzem -->
+                    <div id="diagnoseModal" style="display:none;">
+                        <form id="diagnoseForm" enctype="multipart/form-data" data-url="{% url 'diagnose-plant' %}">
+                            {% csrf_token %}
+                            <input type="file" name="image" id="fileInput" accept="image/*" required>
+                            <label for="fileInput" class="file-upload-button">📷 Choose image</label>
+                            
+                            <input type="hidden" name="plant_id" id="plantIdInput">
+                            <button type="submit">Send for analysis</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-        {% else %}
-            <p>No rating in database.</p>
-        {% endif %}
+            <div class="ai-plotly-chart">
+                {{ plotly_chart|safe }}
+            </div>
+        </div>
+        <div class="ai-rating-notes">
+            <h3 class="ai-rating-header">AI ratings</h3>
+            {% if ai_rating %}
+                <div class="ai-ratings-all">
+                    <div class="ai-rating">
+                        <table>
+                            <thead>
+                            <tr>
+                                <td>Date</td>
+                                <td>Note</td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for rating in ai_rating %}
+                                <tr>
+                                    <td style="color:#294529;font-weight: bold">{{rating.date | date:"d.m.Y"}}</td>
+                                    <td>{{rating.note}}</td>
+                                </tr>
+                            {% empty %}
+                                <p>No AI ratings.</p>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+            {% else %}
+                <p>No rating in database.</p>
+            {% endif %}
+        </div>
     </div>
 
 

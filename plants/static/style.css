@@ -1547,57 +1547,12 @@ footer{
     min-height: 200px;
     overflow: scroll;
 }
-.ai-rating-container{
-    border-radius: 10px;
-    border: 1px solid #cacaca;
-    padding:10px;
-    margin-top:20px;
-    margin-bottom:20px;
-    display: flex;
-    flex-direction: column;
+.usernotes-list h4{
+    margin: 10px 0 5px 0;
 }
-.ai-rating-container h2{
-    margin-bottom: 10px;
-    margin-top: 0;
+.usernotes-list p{
+    margin: 0 0 5px 20px;
 }
-.ai-ratings-all{
-    display: flex;
-    flex-direction: row;
-    align-content: center;
-    justify-content: space-around;
-}
-.plotly-chart{
-    width: 40%;
-    height: fit-content;
-    padding:0;
-    margin:0;
-}
-.ai-rating-header{
-    margin-bottom:0;
-}
-.ai-rating{
-    width: 55%;
-    padding-right: 10px;
-}
-.ai-rating table {
-    border-collapse: collapse;
-    border: 1px solid #c8c8c8;
-    background-color: #ffffff;
-    border-radius: 15px;
-}
-.ai-rating thead{
-    background-color: #dfef96;
-    color: #294529;
-    font-weight: bold;
-}
-.ai-rating tr {
-    border: 1px solid #d5d5d5;
-}
-.ai-rating td {
-    border: 1px solid #d5d5d5;
-    padding: 5px;
-}
-
 
 .add-note-form{
     align-self: center;
@@ -1637,21 +1592,38 @@ footer{
     resize: none;
 }
 
+
+.ai-rating-container{
+    border-radius: 10px;
+    border: 1px solid #cacaca;
+    margin-top:20px;
+    margin-bottom:20px;
+    display: flex;
+    flex-direction: row;
+}
+.ai-rating-sumup{
+    display: flex;
+    flex-direction: column;
+    width:50%;
+    align-content: center;
+    justify-content: center;
+    margin-right: 5px;
+    padding:10px;
+    border-radius: 10px;
+}
 .diagnosis-box{
     display: flex;
     flex-direction: column;
     border-radius: 10px;
-    border: 1px solid #cacaca;
     padding:10px;
-    margin-top:20px;
-    margin-bottom:20px;
 }
 .diagnosis-box p{
     align-self: center;
     color: #527552;
     text-align: center;
+    margin-top:5px;
 }
-.diagnosis-box h2{
+.diagnosis-box h3{
     margin:0;
 }
 .diagnosis-box button{
@@ -1665,10 +1637,114 @@ footer{
     width: 150px;
     margin:2px;
     border-radius: 10px;
+    margin-bottom: 10px;
 }
 .diagnosis-box button:hover{
     background-color: #c2d180;
 }
+#diagnoseModal{
+    border: 1px solid #cacaca;
+    border-radius: 10px;
+    padding: 5px;
+    margin:auto;
+    height: fit-content;
+}
+#diagnoseForm{
+    text-align: center;
+    vertical-align: center;
+    margin:5px auto;
+    padding:0;
+    height: fit-content;
+}
+.custom-file-upload{
+    font-size: 14px;
+    margin:0 5px;
+}
+#fileInput{
+    align-self: center;
+
+    padding: 10px;
+    border:none;
+    background-color: #dfef96;
+    color: #527552;
+    font-weight: bold;
+    margin:2px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+#fileInput:hover{
+    background-color: #c2d180;
+}
+.file-upload-button {
+    display: inline-block;
+    padding: 10px 16px;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+.file-upload-button:hover {
+    background-color: #1565c0;
+}
+#diagnoseForm button{
+    margin:0;
+}
+.ai-plotly-chart{
+    height: fit-content;
+    padding:10px;
+    margin:auto;
+}
+.ai-rating-notes{
+    display: flex;
+    flex-direction: column;
+    width:50%;
+    margin-left: 5px;
+    padding:10px;
+    border-radius: 10px;
+}
+.ai-ratings-all{
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    justify-content: space-around;
+}
+
+.ai-rating-header{
+    margin: 5px 0 0 0 ;
+}
+.ai-rating{
+    padding-right: 10px;
+    margin-top:5px;
+    max-height: 550px;
+    min-height: 500px;
+    overflow: scroll;
+}
+.ai-rating table {
+    border-collapse: collapse;
+    border: 1px solid #c8c8c8;
+    background-color: #ffffff;
+    border-radius: 15px;
+}
+.ai-rating thead{
+    background-color: #dfef96;
+    color: #294529;
+    font-weight: bold;
+}
+.ai-rating tr {
+    border: 1px solid #d5d5d5;
+}
+.ai-rating td {
+    border: 1px solid #d5d5d5;
+    padding: 5px;
+}
+
 
 /**{*/
 /*    border: 1px solid black;*/
