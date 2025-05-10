@@ -11,30 +11,51 @@ document.addEventListener("DOMContentLoaded", function() {
         return null;
     }
 
-    // Formularz dodawania eventu
-    const openModalBtn = document.getElementById('openModal');
-    if (openModalBtn) {
-        openModalBtn.addEventListener('click', function () {
-            const modal = document.getElementById('eventModal');
-            if (modal) {
-                modal.style.display = 'flex';
-            }
-        });
+    function setModalVisibility(triggerId, modalId, displayValue) {
+        const trigger = document.getElementById(triggerId);
+        const modal = document.getElementById(modalId);
+        if (trigger && modal) {
+            trigger.addEventListener('click', () => {
+                modal.style.display = displayValue;
+            });
+        }
     }
-    // Zamykanie formularza dodawania eventu
-    const closeModalBtn = document.getElementById('closeModal');
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', function () {
-            const modal = document.getElementById('eventModal');
-            if (modal) {
-                modal.style.display = 'none';
-            }
-        });
-    }
+    setModalVisibility('openModal', 'eventModal', 'flex');
+    setModalVisibility('closeModal', 'eventModal', 'none');
+    setModalVisibility('openWateringModal', 'wateringModal', 'flex');
+    setModalVisibility('wateringCloseModal', 'wateringModal', 'none');
 
 
-    // Obsługa wysyłki formularza
-    // Dodawanie eventu
+    const sendForm = (url, data, callback) => {
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+                'Content-Type': 'application/json'
+            },
+            body: data
+        })
+        .then(res => res.json())
+        .then(callback)
+        .catch(err => alert("Network error"));
+    };
+
+    const handleButtonClick = (selector, dataObject, url) => {
+        document.querySelectorAll(selector).forEach(button => {
+            button.addEventListener("click", function () {
+                const event_data = dataObject(this);
+                console.log(event_data)
+                if (!getCSRFToken()) return;
+                sendForm(url, JSON.stringify(event_data), data => {
+                    if (data.success) location.reload();
+                    else alert("Error: " + data.error);
+                });
+                console.log('after')
+            });
+        });
+    };
+
+    // Obsługa wysyłki formularza - Dodawanie eventu
     const eventForm = document.getElementById('eventForm');
     if (eventForm) {
         eventForm.addEventListener('submit', function (e) {
@@ -43,121 +64,34 @@ document.addEventListener("DOMContentLoaded", function() {
             const formData = new FormData(form);
             const url = this.dataset.url;
 
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCSRFToken()
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
+            sendForm(url,formData,data => {
                 if (data.success) {
                     alert('Event added!');
                     location.reload();
                 } else {
                     alert('Błąd: ' + data.errors.join(', '));
                 }
-            })
-            .catch(error => {
-                console.error(error);
-                alert('Wystąpił błąd.');
             });
         });
     }
-    const sendForm = (url, data, callback) => {
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCSRFToken(),
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(res => res.json())
-        .then(callback)
-        .catch(err => alert("Network error"));
-    };
+
     // finish-event on calendar
     const finishEvent = document.querySelectorAll('.finish-event')
-
-    if(finishEvent){
-        finishEvent.forEach(button => {
-            button.addEventListener('click', function () {
-                const eventId = this.dataset.eventId;
-                const csrfToken = getCSRFToken();
-                if (!csrfToken) return;
-
-                sendForm('/finish-event/',{event_id: eventId},data => {
-                    if (data.success) location.reload();
-                    else alert("Error: " + data.error);
-                });
-            });
-        });
+    if(finishEvent) {
+        handleButtonClick('.finish-event', btn => ({event_id: btn.dataset.eventId}), "/finish-event/");
     }
-
-    // cancel-event on dashboard
     const cancelEvent = document.querySelectorAll('.cancel-event')
-    if(cancelEvent){
-
-        cancelEvent.forEach(button => {
-            button.addEventListener('click', function () {
-                const eventId = this.dataset.eventId;
-                const csrfToken = getCSRFToken();
-                if (!csrfToken) return;
-
-                sendForm('/cancel-event/',{event_id: eventId},data => {
-                    if (data.success) location.reload();
-                    else alert("Error: " + data.error);
-                });
-            });
-        });
+    if(cancelEvent) {
+        handleButtonClick('.cancel-event', btn => ({event_id: btn.dataset.eventId}), "/cancel-event/");
     }
-
-    // wishlist remove on dashboard
     const wishlistRemove = document.querySelectorAll('.wishlist-remove')
-    if(wishlistRemove){
-        wishlistRemove.forEach(button => {
-            button.addEventListener('click', function () {
-                const { plantId, ownerId } = this.dataset;
-                const csrfToken = getCSRFToken();
-                if (!csrfToken) return;
-
-                sendForm('/wishlist-remove/',{ plant_id: plantId, owner_id: ownerId },data => {
-                    if (data.success) location.reload();
-                    else alert("Error: " + data.error);
-                });
-            });
-        });
+    if(wishlistRemove) {
+        handleButtonClick('.wishlist-remove', btn => ({ plant_id: btn.dataset.plantId, owner_id: btn.dataset.ownerId }), "/wishlist-remove/");
     }
 
-    // wishlist bought on dashboard
     const wishlistBought = document.querySelectorAll('.wishlist-bought')
-    if(wishlistBought){
-        wishlistBought.forEach(button => {
-            button.addEventListener('click', function () {
-                const plantId = this.dataset.plantId;
-                const csrfToken = getCSRFToken();
-                if (!csrfToken) return;
-
-                sendForm('/wishlist-bought/',{ plant_id: plantId },data => {
-                    if (data.success) location.reload();
-                    else alert("Error: " + data.error);
-                });
-            });
-        });
-    }
-
-    // modal watering
-    const openWatering = document.getElementById('openWateringModal');
-    const closeWatering = document.getElementById('wateringCloseModal');
-    const wateringModal = document.getElementById('wateringModal');
-
-    if (openWatering && wateringModal) {
-        openWatering.addEventListener('click', () => wateringModal.style.display = 'flex');
-    }
-    if (closeWatering && wateringModal) {
-        closeWatering.addEventListener('click', () => wateringModal.style.display = 'none');
+    if(wishlistBought) {
+        handleButtonClick('.wishlist-bought', btn => ({ plant_id: btn.dataset.plantId }), "/wishlist-bought/");
     }
 
     // watering form
@@ -167,53 +101,20 @@ document.addEventListener("DOMContentLoaded", function() {
             e.preventDefault();
             const form = e.target;
             const formData = new FormData(form);
-            fetch("{% url 'add-watering' %}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCSRFToken()
-                },
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
+            sendForm("{% url 'add-watering' %}",formData,data => {
                 if (data.success) location.reload();
                 else alert("Error: " + data.errors.join(', '));
-            })
-            .catch(err => alert("Error occured."));
+            });
         });
     }
-
-    // change watering date
     const addDay = document.querySelectorAll('.add-day')
-    if(addDay){
-        addDay.forEach(button => {
-            button.addEventListener('click', function () {
-                const { wateringId, days } = this.dataset;
-                const csrfToken = getCSRFToken();
-                if (!csrfToken) return;
-
-                sendForm('/move-watering/',{ watering_id: wateringId, days: days },data => {
-                    if (data.success) location.reload();
-                    else alert("Error: " + data.error);
-                });
-            });
-        });
+    if(addDay) {
+        handleButtonClick('.add-day', btn => ({watering_id: btn.dataset.wateringId, days: btn.dataset.days }), "/move-watering/");
     }
 
-    // watering done
     const wateringDone = document.querySelectorAll('.watering-done')
-    if(wateringDone){
-        wateringDone.forEach(button => {
-            button.addEventListener('click', function () {
-                const { wateringId, fertilizer } = this.dataset;
-                const csrfToken = getCSRFToken();
-                if (!csrfToken) return;
-                sendForm('/finish-watering/',{ watering_id: wateringId, fertilizer: fertilizer },data => {
-                    if (data.success) location.reload();
-                    else alert("Error: " + data.error);
-                });
-            });
-        });
+    if(wateringDone) {
+        handleButtonClick('.watering-done', btn => ({watering_id: btn.dataset.wateringId, fertilizer: btn.dataset.fertilizer }), "/finish-watering/");
     }
 
     // diagnose modal visibility
@@ -241,13 +142,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const csrfToken = getCSRFToken();
             const url = this.dataset.url;
             if (!csrfToken) return;
-            fetch(url, {
-                method: "POST",
-                headers: { "X-CSRFToken": csrfToken },
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
+            sendForm(url,formData,data => {
                 if (data.diagnosis) alert("Diagnosis:\n" + data.diagnosis);
                 else if (data.error) alert("Error:\n" + data.error);
                 else alert("Failed to get answer.");
@@ -255,8 +150,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (modal) modal.style.display = 'none';
                 diagnoseForm.reset();
                 location.reload();
-            })
-            .catch(err => alert("Network error"));
+            });
         });
     }
     // note form post
@@ -272,7 +166,7 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log(url)
             if (!csrfToken) return;
 
-            sendForm(url,{ plant_id: plantId, user_id: userId, note: note },data => {
+            sendForm(url,JSON.stringify({ plant_id: plantId, user_id: userId, note: note }),data => {
                 if (data.success) location.reload();
                 else alert("Error: " + data.error);
             });
@@ -289,7 +183,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const csrfToken = getCSRFToken()
             if (!csrfToken) return;
 
-            sendForm('change-watering-frequency',{ plant_id: plantId, owner_id: ownerId, frequency: frequency },data => {
+            sendForm('change-watering-frequency',JSON.stringify({ plant_id: plantId, owner_id: ownerId, frequency: frequency }),data => {
                 if (data.success) location.reload();
                 else alert("Error: " + data.error);
             });
@@ -306,7 +200,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 const ownerId = this.dataset.userId;
                 const addUrl = this.dataset.addUrl
 
-                sendForm(addUrl,{ owner_id: ownerId, plant_id: plantId },data => {
+                sendForm(addUrl,JSON.stringify({ owner_id: ownerId, plant_id: plantId }),data => {
                     if (data.success) {
                         this.classList.add('hidden');
                         this.nextElementSibling.classList.remove('hidden');
@@ -329,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 const ownerId = this.dataset.userId;
                 const removeUrl = this.dataset.removeUrl
 
-                sendForm(removeUrl,{ plant_id: plantId, owner_id: ownerId },data => {
+                sendForm(removeUrl,JSON.stringify({ plant_id: plantId, owner_id: ownerId }),data => {
                     if (data.success) {
                         this.classList.add('hidden');
                         this.previousElementSibling.classList.remove('hidden');
