@@ -26,7 +26,7 @@ from plants.views import (HomepageView, AddPlantView, CalendarView, CatalogView,
                           ChangeWateringFrequencyView, RemoveFromWishlistView,AddToWishlistView,
                           FinishWateringView, MoveWateringView, WishlistRemoveView, AddNoteView,
                           WishlistBoughtView, FinishEventView, CancelEventView, GeneratePDFView,
-                          AllEventsView, GenerateWeatherTipView)
+                          AllEventsView)
 from django.conf.urls.static import static
 
 urlpatterns = [

@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
         return null;
     }
 
-    // Formularz dodawania eventu w dashboardzie
+    // Formularz dodawania eventu
     const openModalBtn = document.getElementById('openModal');
     if (openModalBtn) {
         openModalBtn.addEventListener('click', function () {
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
-    // Zamykanie formularza dodawania eventu w dashboardzie
+    // Zamykanie formularza dodawania eventu
     const closeModalBtn = document.getElementById('closeModal');
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', function () {
@@ -31,6 +31,8 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
+
     // Obsługa wysyłki formularza
     // Dodawanie eventu
     const eventForm = document.getElementById('eventForm');
@@ -63,29 +65,33 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     }
-
-    // finish-event on dashboard
+    const sendForm = (url, data, callback) => {
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(callback)
+        .catch(err => alert("Network error"));
+    };
+    // finish-event on calendar
     const finishEvent = document.querySelectorAll('.finish-event')
+
     if(finishEvent){
         finishEvent.forEach(button => {
             button.addEventListener('click', function () {
                 const eventId = this.dataset.eventId;
                 const csrfToken = getCSRFToken();
                 if (!csrfToken) return;
-                fetch("/finish-event/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken
-                    },
-                    body: JSON.stringify({ event_id: eventId })
-                })
-                .then(res => res.json())
-                .then(data => {
+
+                sendForm('/finish-event/',{event_id: eventId},data => {
                     if (data.success) location.reload();
                     else alert("Error: " + data.error);
-                })
-                .catch(err => alert("Network error"));
+                });
             });
         });
     }
@@ -99,20 +105,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 const eventId = this.dataset.eventId;
                 const csrfToken = getCSRFToken();
                 if (!csrfToken) return;
-                fetch("/cancel-event/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken
-                    },
-                    body: JSON.stringify({ event_id: eventId })
-                })
-                .then(res => res.json())
-                .then(data => {
+
+                sendForm('/cancel-event/',{event_id: eventId},data => {
                     if (data.success) location.reload();
                     else alert("Error: " + data.error);
-                })
-                .catch(err => alert("Network error"));
+                });
             });
         });
     }
@@ -125,20 +122,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 const { plantId, ownerId } = this.dataset;
                 const csrfToken = getCSRFToken();
                 if (!csrfToken) return;
-                fetch("/wishlist-remove/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken
-                    },
-                    body: JSON.stringify({ plant_id: plantId, owner_id: ownerId })
-                })
-                .then(res => res.json())
-                .then(data => {
+
+                sendForm('/wishlist-remove/',{ plant_id: plantId, owner_id: ownerId },data => {
                     if (data.success) location.reload();
                     else alert("Error: " + data.error);
-                })
-                .catch(err => alert("Network error"));
+                });
             });
         });
     }
@@ -151,20 +139,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 const plantId = this.dataset.plantId;
                 const csrfToken = getCSRFToken();
                 if (!csrfToken) return;
-                fetch("/wishlist-bought/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken
-                    },
-                    body: JSON.stringify({ plant_id: plantId })
-                })
-                .then(res => res.json())
-                .then(data => {
+
+                sendForm('/wishlist-bought/',{ plant_id: plantId },data => {
                     if (data.success) location.reload();
                     else alert("Error: " + data.error);
-                })
-                .catch(err => alert("Network error"));
+                });
             });
         });
     }
@@ -212,20 +191,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 const { wateringId, days } = this.dataset;
                 const csrfToken = getCSRFToken();
                 if (!csrfToken) return;
-                fetch("/move-watering/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken
-                    },
-                    body: JSON.stringify({ watering_id: wateringId, days: days })
-                })
-                .then(res => res.json())
-                .then(data => {
+
+                sendForm('/move-watering/',{ watering_id: wateringId, days: days },data => {
                     if (data.success) location.reload();
                     else alert("Error: " + data.error);
-                })
-                .catch(err => alert("Network error"));
+                });
             });
         });
     }
@@ -238,20 +208,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 const { wateringId, fertilizer } = this.dataset;
                 const csrfToken = getCSRFToken();
                 if (!csrfToken) return;
-                fetch("/finish-watering/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrfToken
-                    },
-                    body: JSON.stringify({ watering_id: wateringId, fertilizer: fertilizer })
-                })
-                .then(res => res.json())
-                .then(data => {
+                sendForm('/finish-watering/',{ watering_id: wateringId, fertilizer: fertilizer },data => {
                     if (data.success) location.reload();
                     else alert("Error: " + data.error);
-                })
-                .catch(err => alert("Network error"));
+                });
             });
         });
     }
@@ -311,20 +271,11 @@ document.addEventListener("DOMContentLoaded", function() {
             const url = this.dataset.url;
             console.log(url)
             if (!csrfToken) return;
-            fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken
-                },
-                body: JSON.stringify({ plant_id: plantId, user_id: userId, note: note })
-            })
-            .then(res => res.json())
-            .then(data => {
+
+            sendForm(url,{ plant_id: plantId, user_id: userId, note: note },data => {
                 if (data.success) location.reload();
                 else alert("Error: " + data.error);
-            })
-            .catch(err => alert("Network error"));
+            });
         });
     }
     // watering frequency form post
@@ -337,20 +288,11 @@ document.addEventListener("DOMContentLoaded", function() {
             const frequency = this.querySelector("input[name=frequency]").value;
             const csrfToken = getCSRFToken()
             if (!csrfToken) return;
-            fetch("/change-watering-frequency/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken
-                },
-                body: JSON.stringify({ plant_id: plantId, owner_id: ownerId, frequency: frequency })
-            })
-            .then(res => res.json())
-            .then(data => {
+
+            sendForm('change-watering-frequency',{ plant_id: plantId, owner_id: ownerId, frequency: frequency },data => {
                 if (data.success) location.reload();
                 else alert("Error: " + data.error);
-            })
-            .catch(err => alert("Network error"));
+            });
         });
     }
     //dodawanie do wishlisty przez katalog
@@ -362,22 +304,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 const plantId = this.dataset.plantId;
                 const ownerId = this.dataset.userId;
-                const csrfToken = getCSRFToken()
                 const addUrl = this.dataset.addUrl
 
-                fetch(addUrl, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": csrfToken,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        owner_id: ownerId,
-                        plant_id: plantId
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
+                sendForm(addUrl,{ owner_id: ownerId, plant_id: plantId },data => {
                     if (data.success) {
                         this.classList.add('hidden');
                         this.nextElementSibling.classList.remove('hidden');
@@ -385,10 +314,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     } else if (data.error) {
                         alert("Error:\n" + data.error);
                     }
-                })
-                .catch(error => {
-                    alert("Network error:\n" + error);
-                    console.error(error);
                 });
             });
         });
@@ -403,20 +328,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 const plantId = this.dataset.plantId;
                 const ownerId = this.dataset.userId;
                 const removeUrl = this.dataset.removeUrl
-                const csrfToken = getCSRFToken()
-                fetch(removeUrl, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": csrfToken,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        owner_id: ownerId,
-                        plant_id: plantId
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
+
+                sendForm(removeUrl,{ plant_id: plantId, owner_id: ownerId },data => {
                     if (data.success) {
                         this.classList.add('hidden');
                         this.previousElementSibling.classList.remove('hidden');
@@ -424,10 +337,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     } else if (data.error) {
                         alert("Error:\n" + data.error);
                     }
-                })
-                .catch(error => {
-                    alert("Network error:\n" + error);
-                    console.error(error);
                 });
             });
         });
@@ -473,7 +382,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     alert("Network error:\n" + text);
                     alert("Network error");
                 });
-
         });
     }
     const buttonAiForm=document.getElementById("fileInput")
