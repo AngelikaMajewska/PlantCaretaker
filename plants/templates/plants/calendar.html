@@ -65,8 +65,8 @@
                     </div>
                 </div>
                 <div class="user-event-details">
-                    <p><strong>Plant:</strong> {% if event.plant %} {{ event.plant.name }} {% else %} Unassigned {% endif %}</p>
-                    <p><strong>Description:</strong> {{ event.description }}</p>
+                    <p><strong class="header-style">Plant:</strong> {% if event.plant %} {{ event.plant.name }} {% else %} Unassigned {% endif %}</p>
+                    <p><strong class="header-style">Description:</strong> {{ event.description }}</p>
                 </div>
             </div>
             {% empty %}
