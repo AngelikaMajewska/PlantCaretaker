@@ -21,8 +21,12 @@ from django.urls import path
 
 from plants import views
 from plants.views import (HomepageView, AddPlantView, CalendarView, CatalogView, PlantDetailView,
-                          DashboardView, RegisterView,AddEventView,generate_pdf,DiagnosePlantView,
-                          OwnedPlantDetailView, AddWateringView, UserProfileView)
+                          DashboardView, RegisterView, AddEventView,  DiagnosePlantView,
+                          OwnedPlantDetailView, AddWateringView, UserProfileView, AddCommentView,
+                          ChangeWateringFrequencyView, RemoveFromWishlistView,AddToWishlistView,
+                          FinishWateringView, MoveWateringView, WishlistRemoveView, AddNoteView,
+                          WishlistBoughtView, FinishEventView, CancelEventView, GeneratePDFView,
+                          AllEventsView, GenerateWeatherTipView)
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -30,7 +34,7 @@ urlpatterns = [
     path("", HomepageView.as_view(), name="home"),
     path("addplant/", AddPlantView.as_view(), name="addplant"),
     path('calendar/', CalendarView.as_view(), name='calendar'),
-    path('all-events/', views.all_events, name='all_events'),
+    path('all-events/', AllEventsView.as_view(), name='all_events'),
     path('catalog/',CatalogView.as_view(), name='catalog'),
     path('plants/<int:pk>/', PlantDetailView.as_view(), name='plant-detail'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
@@ -39,22 +43,22 @@ urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
     path('add-event/', AddEventView.as_view(), name='add-event'),
     path('finish-event/<int:pk>', AddEventView.as_view(), name='finish-event'),
-    path('generate-pdf/', generate_pdf, name='generate-pdf'),
+    path('generate-pdf/', GeneratePDFView.as_view(), name='generate-pdf'),
     path('diagnose/', DiagnosePlantView.as_view(), name='diagnose-plant'),
     path('my-plants/<int:pk>/', OwnedPlantDetailView.as_view(), name='my-plants'),
-    path('finish-event/', views.finish_event, name='finish-event'),
-    path('cancel-event/', views.cancel_event, name='cancel-event'),
-    path('add-note/', views.add_note, name='add-note'),
-    path('wishlist-remove/', views.wishlist_remove, name='wishlist-remove'),
-    path('wishlist-bought/', views.wishlist_bought, name='wishlist-bought'),
+    path('finish-event/', FinishEventView.as_view(), name='finish-event'),
+    path('cancel-event/', CancelEventView.as_view(), name='cancel-event'),
+    path('add-note/', AddNoteView.as_view(), name='add-note'),
+    path('wishlist-remove/', WishlistRemoveView.as_view(), name='wishlist-remove'),
+    path('wishlist-bought/', WishlistBoughtView.as_view(), name='wishlist-bought'),
     path('add-watering/', AddWateringView.as_view(), name='add-watering'),
-    path('move-watering/', views.move_watering, name='move-watering'),
-    path('finish-watering/', views.finish_watering, name='finish-watering'),
+    path('move-watering/', MoveWateringView.as_view(), name='move-watering'),
+    path('finish-watering/', FinishWateringView.as_view(), name='finish-watering'),
     path('profile/', UserProfileView.as_view(), name='profile'),
-    path('add-to-wishlist/', views.add_to_wishlist, name='add-to-wishlist'),
-    path('remove-from-wishlist/', views.remove_from_wishlist, name='remove-from-wishlist'),
-    path('change-watering-frequency/',views.change_watering_frequency, name='change-watering-frequency'),
-    path('add-comment/', views.add_comment, name='add-comment'),
+    path('add-to-wishlist/', AddToWishlistView.as_view(), name='add-to-wishlist'),
+    path('remove-from-wishlist/', RemoveFromWishlistView.as_view(), name='remove-from-wishlist'),
+    path('change-watering-frequency/',ChangeWateringFrequencyView.as_view(), name='change-watering-frequency'),
+    path('add-comment/', AddCommentView.as_view(), name='add-comment'),
     path('generate-plant-pdf/<int:pk>/', views.generate_plant_pdf, name='generate-plant-pdf'),
 ]
 

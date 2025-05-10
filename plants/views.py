@@ -9,6 +9,7 @@ import plotly.offline as opy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from weasyprint import HTML
+from collections import defaultdict
 
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
@@ -82,22 +83,26 @@ class CalendarView(TemplateView):
         return context
 
 
-def all_events(request):
-    events = Event.objects.filter(user=request.user,is_finished=False).select_related('plant').order_by('date')
-    event_list = []
+class AllEventsView(View):
+    def get(self, request, *args, **kwargs):
+        events = Event.objects.filter(
+            user=request.user,
+            is_finished=False
+        ).select_related('plant').order_by('date')
 
-    for event in events:
-        event_list.append({
-            'title': event.name,
-            'plant': {
-                'id': event.plant.id,
-                'name': event.plant.name,
-            } if event.plant else None,
-            'start': event.date.strftime("%Y-%m-%d"),
-            'description': event.description,
-        })
+        event_list = []
+        for event in events:
+            event_list.append({
+                'title': event.name,
+                'plant': {
+                    'id': event.plant.id,
+                    'name': event.plant.name,
+                } if event.plant else None,
+                'start': event.date.strftime("%Y-%m-%d"),
+                'description': event.description,
+            })
 
-    return JsonResponse(event_list, safe=False)
+        return JsonResponse(event_list, safe=False)
 
 class CatalogView(TemplateView):
     template_name = 'plants/catalog.html'
@@ -252,72 +257,76 @@ class AddWateringView(View):
             print('Form errors:', error_list)  # log do konsoli serwera
             return JsonResponse({'success': False, 'errors': error_list}, status=400)
 
-def generate_pdf(request, **kwargs):
-    this_month = datetime.today().month
-    events = Event.objects.filter(user=request.user, is_finished=False, date__month = this_month).select_related('plant').order_by('date')
-    wishlist = WishList.objects.filter(owner=request.user).select_related('plant')
+class GeneratePDFView(View):
+    def get(self, request, *args, **kwargs):
+        this_month = datetime.today().month
 
-    owned_plants = OwnedPlants.objects.filter(owner=request.user).select_related('plant')
+        events = Event.objects.filter(
+            user=request.user,
+            is_finished=False,
+            date__month=this_month
+        ).select_related('plant').order_by('date')
 
-    owned = [plant.plant.id for plant in owned_plants]
+        wishlist = WishList.objects.filter(
+            owner=request.user
+        ).select_related('plant')
 
+        owned_plants = OwnedPlants.objects.filter(
+            owner=request.user
+        ).select_related('plant')
 
-    last_waterings = []
-    for plantid in owned:
-        last = Watering.objects.filter(plant_id=int(plantid), user_id=request.user.id).order_by(
-            '-next_watering').first()
-        last_waterings.append(last)
+        owned = [plant.plant.id for plant in owned_plants]
 
-    waterings_dict = {}
-    for item in last_waterings:
-        if not item:  # Pomijamy None
-            continue
-        plant_name = item.plant.name
-        frequency = item.plant.watering_frequency
-        start_date = item.next_watering
-        # Generuj do przodu 14 terminów (np. co tydzień)
-        future_dates = [
-            start_date + timedelta(days=frequency * i)
-            for i in range(1, 15)
-            if (start_date + timedelta(days=frequency * i)).month == this_month
-        ]
-        waterings_dict[plant_name] = future_dates
-    # sorted_waterings = sorted([w for w in last_waterings if w], key=lambda w: w.next_watering)
-    sorted_waterings = sorted(
-        [(plant, dates) for plant, dates in waterings_dict.items() if dates],
-        key=lambda x: x[1][0]  # sortujemy po pierwszej dacie z listy
-    )
+        last_waterings = []
+        for plant_id in owned:
+            last = Watering.objects.filter(
+                plant_id=plant_id,
+                user_id=request.user.id
+            ).order_by('-next_watering').first()
+            if last:
+                last_waterings.append(last)
 
+        waterings_dict = {}
+        for item in last_waterings:
+            plant_name = item.plant.name
+            frequency = item.plant.watering_frequency
+            start_date = item.next_watering
+            future_dates = [
+                start_date + timedelta(days=frequency * i)
+                for i in range(1, 15)
+                if (start_date + timedelta(days=frequency * i)).month == this_month
+            ]
+            waterings_dict[plant_name] = future_dates
 
-    from collections import defaultdict
+        sorted_waterings = sorted(
+            [(plant, dates) for plant, dates in waterings_dict.items() if dates],
+            key=lambda x: x[1][0]
+        )
 
-    grouped_by_day = defaultdict(list)
+        grouped_by_day = defaultdict(list)
+        for plant_name, dates in sorted_waterings:
+            for date in dates:
+                key = date.strftime('%B %d')
+                grouped_by_day[key].append(plant_name)
 
-    for plant_name, dates in sorted_waterings:
-        if not dates:
-            continue  # pomiń, jeśli nie ma żadnych dat
-        for date in dates:
-            key = date.strftime('%B %d')  # np. "May 07"
-            grouped_by_day[key].append(plant_name)
+        grouped_by_day = dict(sorted(
+            grouped_by_day.items(),
+            key=lambda x: datetime.strptime(x[0], "%B %d")
+        ))
 
-    # Posortuj według daty (konwersja z tekstu do datetime)
-    grouped_by_day = dict(sorted(
-        grouped_by_day.items(),
-        key=lambda x: datetime.strptime(x[0], "%B %d")
-    ))
-    context = {
-        'events': events,
-        'wishlist': wishlist,
-        'grouped_by_day': grouped_by_day,
-    }
+        context = {
+            'events': events,
+            'wishlist': wishlist,
+            'grouped_by_day': grouped_by_day,
+        }
 
-    html_string = render_to_string('plants/pdf_template.html', context)
-    html = HTML(string=html_string)
-    pdf_file = html.write_pdf()
+        html_string = render_to_string('plants/pdf_template.html', context)
+        html = HTML(string=html_string)
+        pdf_file = html.write_pdf()
 
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="month_planner.pdf"'
-    return response
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="month_planner.pdf"'
+        return response
 
 @method_decorator(csrf_exempt, name='dispatch')
 class DiagnosePlantView(View):
@@ -504,35 +513,39 @@ class OwnedPlantDetailView(TemplateView):
         watering_frequency = OwnedPlants.objects.get(owner_id=self.request.user.id, plant_id = plant_id).owner_watering_frequency
         context['watering_frequency'] = watering_frequency
         return context
-
-
-def finish_event(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        event_id = data.get("event_id")
+class FinishEventView(View):
+    def post(self, request, *args, **kwargs):
         try:
+            data = json.loads(request.body)
+            event_id = data.get("event_id")
             event = Event.objects.get(id=event_id)
             event.is_finished = True
             event.save()
             return JsonResponse({"success": True})
         except Event.DoesNotExist:
             return JsonResponse({"success": False, "error": "Event doesn't exist"})
-    return JsonResponse({"success": False, "error": "Bad request"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
 
-def cancel_event(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        event_id = data.get("event_id")
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Bad request"})
+class CancelEventView(View):
+    def post(self, request, *args, **kwargs):
         try:
+            data = json.loads(request.body)
+            event_id = data.get("event_id")
             event = Event.objects.get(id=event_id)
             event.delete()
             return JsonResponse({"success": True})
         except Event.DoesNotExist:
             return JsonResponse({"success": False, "error": "Event doesn't exist"})
-    return JsonResponse({"success": False, "error": "Bad request"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
 
-def add_note(request):
-    if request.method == "POST":
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Bad request"})
+class AddNoteView(View):
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
             plant_id = data.get("plant_id")
@@ -542,79 +555,102 @@ def add_note(request):
             if not note_text:
                 return JsonResponse({"success": False, "error": "Note is empty"})
 
-            note = UserNotes.objects.create(user_id=user_id, plant_id=plant_id, note=note_text)
+            UserNotes.objects.create(user_id=user_id, plant_id=plant_id, note=note_text)
             return JsonResponse({"success": True})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Invalid request"})
 
-def wishlist_remove(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        plant_id = data.get("plant_id")
-        owner_id = request.user.id
-        try:
-            wishlist_plant = WishList.objects.get(plant_id=plant_id,owner_id=owner_id)
-            wishlist_plant.delete()
-            return JsonResponse({"success": True})
-        except Exception:
-            return JsonResponse({"success": False, "error": "Some error occurred"})
-    return JsonResponse({"success": False, "error": "Bad request"})
-
-def wishlist_bought(request):
-    if request.method == "POST":
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method"})
+class WishlistRemoveView(View):
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
             plant_id = data.get("plant_id")
-            print(f"User ID: {request.user.id}, Plant ID: {plant_id}")
             owner_id = request.user.id
+
+            wishlist_plant = WishList.objects.get(plant_id=plant_id, owner_id=owner_id)
+            wishlist_plant.delete()
+            return JsonResponse({"success": True})
+        except WishList.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Plant not found on wishlist"})
+        except Exception:
+            return JsonResponse({"success": False, "error": "Some error occurred"})
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Bad request"})
+class WishlistBoughtView(View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            plant_id = data.get("plant_id")
+            owner_id = request.user.id
+
             wishlist_plant = WishList.objects.get(plant_id=plant_id, owner_id=owner_id)
             owned, created = OwnedPlants.objects.get_or_create(plant_id=plant_id, owner_id=owner_id)
             wishlist_plant.delete()
             return JsonResponse({"success": True, "created": created})
+
         except WishList.DoesNotExist:
             return JsonResponse({"success": False, "error": "Plant not found on wishlist."})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Invalid request method."})
 
-def move_watering(request):
-    if request.method == "POST":
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
+class MoveWateringView(View):
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
             watering_id = data.get("watering_id")
             days = int(data.get("days"))
+
             watering = Watering.objects.get(id=watering_id)
             watering.next_watering += timedelta(days=days)
             watering.save()
             return JsonResponse({"success": True})
+
         except Watering.DoesNotExist:
             return JsonResponse({"success": False, "error": "Watering not found on the list."})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Invalid request method."})
 
-def finish_watering(request):
-    if request.method == "POST":
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
+class FinishWateringView(View):
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
             watering_id = data.get("watering_id")
             fertilizer = data.get("fertilizer")
             fertilizer = True if fertilizer == "True" else False
+
             watering = Watering.objects.get(id=watering_id)
             user_id = request.user.id
             plant_id = watering.plant.id
-            # plant_watering_frequency = watering.plant.watering_frequency
-            user_watering_frequency = OwnedPlants.objects.get(owner=request.user, plant=plant_id).owner_watering_frequency
-            new_watering = Watering.objects.create(user_id = user_id, plant_id=plant_id,date=date.today(), fertiliser=fertilizer, next_watering=(date.today() + timedelta(days=user_watering_frequency)))
-            new_watering.save()
+
+            user_plant = OwnedPlants.objects.get(owner=request.user, plant=plant_id)
+            user_watering_frequency = user_plant.owner_watering_frequency
+
+            new_watering = Watering.objects.create(
+                user_id=user_id,
+                plant_id=plant_id,
+                date=date.today(),
+                fertiliser=fertilizer,
+                next_watering=(date.today() + timedelta(days=user_watering_frequency))
+            )
+
             return JsonResponse({"success": True})
+
         except Watering.DoesNotExist:
             return JsonResponse({"success": False, "error": "Watering not found on the list."})
+        except OwnedPlants.DoesNotExist:
+            return JsonResponse({"success": False, "error": "User does not own this plant."})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Invalid request method."})
 
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
 class UserProfileView(LoginRequiredMixin, View):
     template_name = 'plants/user_profile.html'
 
@@ -641,67 +677,83 @@ class UserProfileView(LoginRequiredMixin, View):
             'user_form': user_form,
             'location_form': location_form
         })
-
-def add_to_wishlist(request):
-    if request.method == "POST":
+class AddToWishlistView(View):
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
             plant_id = data.get("plant_id")
             owner_id = data.get("owner_id")
+
             if WishList.objects.filter(owner_id=owner_id, plant_id=plant_id).exists():
                 return JsonResponse({"success": False, "error": "Plant already in wishlist."})
+
             WishList.objects.create(plant_id=plant_id, owner_id=owner_id)
             return JsonResponse({"success": True})
+
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Invalid request method."})
 
-def remove_from_wishlist(request):
-    if request.method == "POST":
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
+class RemoveFromWishlistView(View):
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
             plant_id = data.get("plant_id")
             owner_id = data.get("owner_id")
+
             if WishList.objects.filter(owner_id=owner_id, plant_id=plant_id).exists():
                 record = WishList.objects.get(owner_id=owner_id, plant_id=plant_id)
                 record.delete()
                 return JsonResponse({"success": True})
+
             return JsonResponse({"success": False, "error": "Plant not in the wishlist."})
+
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Invalid request method."})
 
-def change_watering_frequency(request):
-    if request.method == "POST":
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
+class ChangeWateringFrequencyView(View):
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
             plant_id = data.get("plant_id")
             owner_id = data.get("owner_id")
             frequency = data.get("frequency")
+
             if OwnedPlants.objects.filter(owner_id=owner_id, plant_id=plant_id).exists():
                 record = OwnedPlants.objects.get(owner_id=owner_id, plant_id=plant_id)
                 record.owner_watering_frequency = frequency
                 record.save()
                 return JsonResponse({"success": True})
+
             return JsonResponse({"success": False, "error": "Operation unsuccessful."})
+
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Invalid request method."})
 
-
-def add_comment(request):
-    if request.method == "POST":
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
+class AddCommentView(View):
+    def post(self, request, *args, **kwargs):
         try:
             data = json.loads(request.body)
             plant_id = data.get("plant_id")
             user_id = data.get("user_id")
             comment = data.get("comment")
-            add_comment = PlantDetailComments.objects.create(plant_id=plant_id, user_id=user_id, comment=comment)
-            add_comment.save()
+
+            new_comment = PlantDetailComments.objects.create(
+                plant_id=plant_id,
+                user_id=user_id,
+                comment=comment
+            )
             return JsonResponse({"success": True})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Invalid request method."})
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
 
 def generate_plant_pdf(request, pk):
     plant_id = pk

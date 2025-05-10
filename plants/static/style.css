@@ -24,8 +24,9 @@ nav{
 main{
     display: flex;
     justify-content: center;
-    margin:auto;
+    margin:0 auto 200px auto;
     width: 85%;
+    max-width: 1500px;
     font-size: 18px;
     font-family: inherit;
 }
@@ -34,6 +35,10 @@ footer{
     align-self: end;
     background-color: #dfef96;
     margin-top: 30px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+
 }
 .filler{
     width: 25%;
@@ -252,6 +257,7 @@ footer{
     flex-direction: row;
     justify-content: center;
     width: 100%;
+    height: 100%;
 }
 .event-list{
     max-height: 600px;
