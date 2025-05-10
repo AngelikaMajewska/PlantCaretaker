@@ -6,8 +6,6 @@ body{
     flex-direction: column;
     width: 100%;
     margin:auto;
-    /*background: rgba(87, 199, 133, 10);*/
-    /*background: linear-gradient(180deg, rgba(159, 230, 188, 0.33) 11%, rgba(237, 230, 167, 0.31) 25%, rgba(255, 255, 255, 1) 83%);*/
     background-size: cover;
     background-position: center top;
     background-repeat: no-repeat;
@@ -15,9 +13,7 @@ body{
     height: 790px;
     background-color: #fafbf2;
 }
-/**{*/
-/*    border: 1px solid black;*/
-/*}*/
+
 nav{
     align-self: initial;
     margin-bottom: 30px;
@@ -36,7 +32,6 @@ main{
 footer{
     width: 100%;
     align-self: end;
-    /*background: #dfef96;*/
     background-color: #dfef96;
     margin-top: 30px;
 }
@@ -282,7 +277,6 @@ footer{
     margin-bottom: 5px;
     padding-left: 5px;
 }
-
 .calendar-box{
     width: 70%;
     height: 100%;
@@ -295,36 +289,31 @@ footer{
     margin:auto;
     transition: all 0.3s ease;
 }
-/* Styl nagłówka */
 .fc-toolbar-title {
     font-size: 20px;
     color: #3a450a; /* ciemnozielony */
     font-weight: bold;
 }
-/* Styl przycisków (Next, Prev, Today) */
 .fc .fc-button {
     border: none !important;
     margin: 0 2px;
     border-radius: 6px !important;
     padding: 5px 10px !important;
-    background-color: #dfef96 !important;
-    color: #666e38;
+    background-color: #f0f4d5 !important;
+    color: #90a320 !important;
     transition: background-color 0.2s ease !important;
 }
 .fc .fc-button:hover {
-    background-color: #cce365 !important; /* ciemniejszy przy hoverze */
+    background-color: #dfeaa3 !important;
 }
-
-/* Styl dni */
 .fc-daygrid-day {
     background-color: #fdfffd;
 }
 .fc-day-today {
-    background: #d6dab7 !important; /* dzisiejszy dzień na jasnozielono */
+    background: #d3e182 !important; /* dzisiejszy dzień na jasnozielono */
 }
-/* Styl wydarzeń */
 .fc-event {
-    background-color: #3a450a;
+    background-color: #7e8845;
     border: none;
     font-size: 14px;
     padding: 2px 4px;
@@ -840,8 +829,8 @@ footer{
     padding: 0 10px 10px 10px;
     margin-bottom: 20px;
     margin-top:0;
-    min-height: 565px;
-    max-height: 565px;
+    min-height: 595px;
+    max-height: 595px;
     scroll-margin: 0;
 }
 .watering-schedule-header{
@@ -936,8 +925,6 @@ footer{
     border-radius: 5px;
     padding: 10px;
     color: #363e16;
-    border: 1px solid rgba(54, 62, 22, 0.24);
-    background-color: #fdfff8;
 }
 .next-watering-details{
     display: flex;
@@ -996,14 +983,14 @@ footer{
     height: 60px;
     border-radius: 10px;
     padding:5px;
-    background-color: #fdfff8;
+    background-color: #f0f8c7;
+
     display: flex;
     flex-direction: row;
     justify-content: start;
     margin-bottom: 5px;
     width: calc(50% - 13.34px); /* 3 kolumny, odejmujemy 2/3 gapu */
     box-sizing: border-box;
-    box-shadow: 0 4px 12px rgba(161, 172, 134, 0.18);
 }
 .owned-plant-image{
     max-height: 50px;
@@ -1022,6 +1009,7 @@ footer{
 .owned-plant-name{
     margin-top:0;
     align-self: center;
+    color: #3a430e !important;
 }
 /* ---------------------------------- */
 /*              wishlist              */
@@ -1313,11 +1301,9 @@ footer{
     display: flex;
     flex-direction: column;
     width:50%;
-    align-content: center;
-    justify-content: center;
     margin-right: 5px;
-    padding:10px;
-    border-radius: 10px;
+    margin-top:0;
+    padding:0 10px;
 }
 .diagnosis-box{
     display: flex;
@@ -1333,8 +1319,8 @@ footer{
     text-align: left;
     margin-top:5px;
 }
-.diagnosis-box h3{
-    margin:0;
+.ai-rating-sumup h3{
+    margin:0 0 5px 0;
 }
 .diagnosis-box button{
     font-weight: bold;
@@ -1402,7 +1388,6 @@ footer{
     align-content: center;
     justify-content: space-around;
 }
-
 .ai-rating-header{
     margin: 5px 0 0 0 ;
 }
@@ -1411,28 +1396,41 @@ footer{
     margin-top:5px;
     max-height: 550px;
     min-height: 500px;
-    overflow: scroll;
 }
-.ai-rating table {
-    border-collapse: collapse;
-    border: 1px solid #c8c8c8;
-    background-color: #ffffff;
-    border-radius: 15px;
-}
-.ai-rating thead{
-    background-color: #dfef96;
-    color: #294529;
+.ai-rating-list-header{
+    display: flex;
+    flex-direction: row;
     font-weight: bold;
 }
-.ai-rating tr {
-    border: 1px solid #d5d5d5;
+.ai-rating-list-note {
+    display: flex;
+    flex-direction: row;
+    border-radius: 30px;
+    margin: 10px 0;
+    position: relative;
+    align-items: stretch; /* <- to kluczowe */
+    overflow: hidden; /* dla estetyki przy zaokrąglonych rogach */
 }
-.ai-rating td {
-    border: 1px solid #d5d5d5;
+.ai-rating-list-note-date,
+.ai-rating-list-note-content {
+    display: flex;           /* pozwala kontrolować układ wewnątrz */
+    align-items: center;     /* środek w pionie */
+    justify-content: center; /* środek w poziomie (dla daty) */
     padding: 5px;
+    margin: 0;
 }
-
-
+.ai-rating-list-note-date {
+    background-color: #e3ecbf;
+    border-radius: 30px 0 0 30px;
+    width: 18%;
+    color: #6e7a40;
+}
+.ai-rating-list-note-content {
+    background-color: #f4f8e5;
+    border-radius: 0 30px 30px 0;
+    width: 82%;
+    padding-left: 10px;
+}
 /**{*/
 /*    border: 1px solid black;*/
 /*}*/

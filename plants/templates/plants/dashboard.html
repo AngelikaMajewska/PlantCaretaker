@@ -87,7 +87,7 @@
                         {% for plant in owned_plants %}
                         <div class="user-owned-plant">
                             <div class="owned-plant-image">{% if plant.plant.image %}
-                                <a href="{% url 'plant-detail' plant.plant.pk %}"><img src="{{ plant.plant.image.url }}" alt="{{ plant.plant.name }}"></a>
+                                <a href="{% url 'my-plants' plant.plant.pk %}"><img src="{{ plant.plant.image.url }}" alt="{{ plant.plant.name }}"></a>
                                 {% else %}
                                 <img src="/static/images/default-plant.png" alt="Default plant image">
                                 {% endif %}
