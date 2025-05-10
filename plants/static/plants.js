@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function() {
     setModalVisibility('wateringCloseModal', 'wateringModal', 'none');
 
 
-    const sendForm = (url, data, callback) => {
+    const sendRequest= (url, data, callback) => {
         fetch(url, {
             method: 'POST',
             headers: {
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 const event_data = dataObject(this);
                 console.log(event_data)
                 if (!getCSRFToken()) return;
-                sendForm(url, JSON.stringify(event_data), data => {
+                sendRequest(url, JSON.stringify(event_data), data => {
                     if (data.success) location.reload();
                     else alert("Error: " + data.error);
                 });
@@ -55,69 +55,101 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     };
 
-    // Obsługa wysyłki formularza - Dodawanie eventu
-    const eventForm = document.getElementById('eventForm');
-    if (eventForm) {
-        eventForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            const url = this.dataset.url;
-
-            sendForm(url,formData,data => {
-                if (data.success) {
-                    alert('Event added!');
-                    location.reload();
-                } else {
-                    alert('Błąd: ' + data.errors.join(', '));
-                }
-            });
-        });
-    }
-
     // finish-event on calendar
     const finishEvent = document.querySelectorAll('.finish-event')
     if(finishEvent) {
         handleButtonClick('.finish-event', btn => ({event_id: btn.dataset.eventId}), "/finish-event/");
     }
+    // cancel-event on calendar
     const cancelEvent = document.querySelectorAll('.cancel-event')
     if(cancelEvent) {
         handleButtonClick('.cancel-event', btn => ({event_id: btn.dataset.eventId}), "/cancel-event/");
     }
+    //removing from wishlist through dashboard
     const wishlistRemove = document.querySelectorAll('.wishlist-remove')
     if(wishlistRemove) {
         handleButtonClick('.wishlist-remove', btn => ({ plant_id: btn.dataset.plantId, owner_id: btn.dataset.ownerId }), "/wishlist-remove/");
     }
-
+    //marking as acquired through dashboard
     const wishlistBought = document.querySelectorAll('.wishlist-bought')
     if(wishlistBought) {
         handleButtonClick('.wishlist-bought', btn => ({ plant_id: btn.dataset.plantId }), "/wishlist-bought/");
     }
-
-    // watering form
-    const wateringForm = document.getElementById('wateringForm');
-    if (wateringForm) {
-        wateringForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            sendForm("{% url 'add-watering' %}",formData,data => {
-                if (data.success) location.reload();
-                else alert("Error: " + data.errors.join(', '));
-            });
-        });
+    //adding to wishlist through catalh
+    const toWishlistIcons = document.querySelectorAll('.to-wishlist');
+    if(toWishlistIcons) {
+        handleButtonClick('.to-wishlist', btn => ({owner_id: btn.dataset.userId, plant_id: btn.dataset.plantId }), "/add-to-wishlist/");
     }
+    //removing from wishlist through catalog
+    const wishlistedIcons = document.querySelectorAll('.wishlisted');
+    if(wishlistedIcons) {
+        handleButtonClick('.wishlisted', btn => ({owner_id: btn.dataset.userId, plant_id: btn.dataset.plantId }), "/remove-from-wishlist/");
+    }
+    // changing next watering date by +-1 day
     const addDay = document.querySelectorAll('.add-day')
     if(addDay) {
         handleButtonClick('.add-day', btn => ({watering_id: btn.dataset.wateringId, days: btn.dataset.days }), "/move-watering/");
     }
-
+    // marking watering as done(with and without fertilizer)
     const wateringDone = document.querySelectorAll('.watering-done')
     if(wateringDone) {
         handleButtonClick('.watering-done', btn => ({watering_id: btn.dataset.wateringId, fertilizer: btn.dataset.fertilizer }), "/finish-watering/");
     }
 
-    // diagnose modal visibility
+    const sendForm = (url, data, callback) => {
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+            },
+            body: data
+        })
+        .then(res => res.json())
+        .then(callback)
+        .catch(err => alert("Network error"));
+    };
+
+    const handleFormSubmit = (formId, getData) => {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                const url = this.dataset.url || form.action;
+                const form_data = getData(this);
+                sendForm(url, form_data, data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + (data.error || data.errors?.join(", ")));
+                    }
+                });
+            });
+        }
+    };
+
+    // adding event in the calendar
+    const eventForm = document.getElementById('eventForm');
+    if (eventForm) {
+        handleFormSubmit('eventForm',form => new FormData(form))
+    }
+
+    // watering form
+    const wateringForm = document.getElementById('wateringForm');
+    if (wateringForm) {
+        handleFormSubmit('wateringForm',form => new FormData(form))
+    }
+    // owned plant note form post
+    const noteForm = document.getElementById("note-form");
+    if (noteForm) {
+        handleFormSubmit('note-form',form => new FormData(form))
+    }
+
+    // watering frequency caenge form post
+    const freqForm = document.getElementById("watering-frequency-form");
+    if (freqForm) {
+        handleFormSubmit('watering-frequency-form',form => new FormData(form))
+    }
+    // AI diagnose modal visibility
     const diagnoseBtn = document.querySelectorAll('.diagnose-btn')
     if(diagnoseBtn){
         diagnoseBtn.forEach(button => {
@@ -133,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // diagnose form
+    // AI diagnose form
     const diagnoseForm = document.getElementById('diagnoseForm');
     if (diagnoseForm) {
         diagnoseForm.addEventListener('submit', function (e) {
@@ -153,89 +185,9 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     }
-    // note form post
-    const noteForm = document.getElementById("note-form");
-    if (noteForm) {
-        noteForm.addEventListener("submit", function (e) {
-            e.preventDefault();
-            const note = this.querySelector("textarea[name=note]").value;
-            const plantId = this.querySelector("input[name=plant_id]").value;
-            const userId = this.querySelector("input[name=user_id]").value;
-            const csrfToken = getCSRFToken();
-            const url = this.dataset.url;
-            console.log(url)
-            if (!csrfToken) return;
 
-            sendForm(url,JSON.stringify({ plant_id: plantId, user_id: userId, note: note }),data => {
-                if (data.success) location.reload();
-                else alert("Error: " + data.error);
-            });
-        });
-    }
-    // watering frequency form post
-    const freqForm = document.getElementById("watering-frequency-form");
-    if (freqForm) {
-        freqForm.addEventListener("submit", function (e) {
-            e.preventDefault();
-            const plantId = this.querySelector("input[name=plant_id]").value;
-            const ownerId = this.querySelector("input[name=owner_id]").value;
-            const frequency = this.querySelector("input[name=frequency]").value;
-            const csrfToken = getCSRFToken()
-            if (!csrfToken) return;
 
-            sendForm('change-watering-frequency',JSON.stringify({ plant_id: plantId, owner_id: ownerId, frequency: frequency }),data => {
-                if (data.success) location.reload();
-                else alert("Error: " + data.error);
-            });
-        });
-    }
-    //dodawanie do wishlisty przez katalog
-    const toWishlistIcons = document.querySelectorAll('.to-wishlist');
-    if (toWishlistIcons.length) {
-        toWishlistIcons.forEach(icon => {
-            icon.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                const plantId = this.dataset.plantId;
-                const ownerId = this.dataset.userId;
-                const addUrl = this.dataset.addUrl
-
-                sendForm(addUrl,JSON.stringify({ owner_id: ownerId, plant_id: plantId }),data => {
-                    if (data.success) {
-                        this.classList.add('hidden');
-                        this.nextElementSibling.classList.remove('hidden');
-                        location.reload();
-                    } else if (data.error) {
-                        alert("Error:\n" + data.error);
-                    }
-                });
-            });
-        });
-    }
-    //usuwanie z wishlisty przez katalog
-    const wishlistedIcons = document.querySelectorAll('.wishlisted');
-    if (wishlistedIcons) {
-        wishlistedIcons.forEach(icon => {
-            icon.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                const plantId = this.dataset.plantId;
-                const ownerId = this.dataset.userId;
-                const removeUrl = this.dataset.removeUrl
-
-                sendForm(removeUrl,JSON.stringify({ plant_id: plantId, owner_id: ownerId }),data => {
-                    if (data.success) {
-                        this.classList.add('hidden');
-                        this.previousElementSibling.classList.remove('hidden');
-                        location.reload();
-                    } else if (data.error) {
-                        alert("Error:\n" + data.error);
-                    }
-                });
-            });
-        });
-    }
-    //dodawanie komentarza w plant-detail
+    //adding comment in plant-detail
     const commentForm = document.getElementById("comment-form");
     if (commentForm) {
         commentForm.addEventListener('submit', function (e) {
@@ -278,6 +230,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
         });
     }
+    //showing chosen file name in owned plant diagnosis form box
     const buttonAiForm=document.getElementById("fileInput")
     if (buttonAiForm){
         buttonAiForm.addEventListener("change", function () {

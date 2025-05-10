@@ -23,7 +23,8 @@
                 </div>
                 <div class="watering-frequency">
                     <p><strong class="header-style">Change watering frequency</strong></p>
-                    <form id="watering-frequency-form" >
+                    <form id="watering-frequency-form" method="post" data-url="{% url 'change-watering-frequency' %}" >
+                        {% csrf_token %}
                         <input type="number" id="watering-frequency-select" name="frequency" step="1" min="1" value="{{watering_frequency}}">
                         <input type="hidden" name="plant_id" value="{{plant.id}}">
                         <input type="hidden" name="owner_id" value="{{user.id}}">

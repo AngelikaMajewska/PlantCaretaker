@@ -547,10 +547,9 @@ class CancelEventView(View):
 class AddNoteView(View):
     def post(self, request, *args, **kwargs):
         try:
-            data = json.loads(request.body)
-            plant_id = data.get("plant_id")
-            user_id = data.get("user_id")
-            note_text = data.get("note")
+            plant_id = request.POST.get("plant_id")
+            user_id = request.POST.get("user_id")
+            note_text = request.POST.get("note")
 
             if not note_text:
                 return JsonResponse({"success": False, "error": "Note is empty"})
@@ -717,10 +716,9 @@ class RemoveFromWishlistView(View):
 class ChangeWateringFrequencyView(View):
     def post(self, request, *args, **kwargs):
         try:
-            data = json.loads(request.body)
-            plant_id = data.get("plant_id")
-            owner_id = data.get("owner_id")
-            frequency = data.get("frequency")
+            plant_id = request.POST.get("plant_id")
+            owner_id = request.POST.get("owner_id")
+            frequency = request.POST.get("frequency")
 
             if OwnedPlants.objects.filter(owner_id=owner_id, plant_id=plant_id).exists():
                 record = OwnedPlants.objects.get(owner_id=owner_id, plant_id=plant_id)

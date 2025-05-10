@@ -10,7 +10,7 @@
 {#                <button id="openWateringModal" class="all-buttons small-button">+</button>#}
                     <!-- Modal -->
                     <div id="wateringModal" style="display: none;">
-                        <form id="wateringForm" method="post">
+                        <form id="wateringForm" method="post" data-url="{% url 'add-watering' %}">
                             <div id="wateringModalHeader">
                                 <h3>Add watering</h3>
                                 <p id="wateringCloseModal">&#x166D; </p>
