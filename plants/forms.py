@@ -6,7 +6,13 @@ from django.contrib.auth.models import User
 class PlantForm(forms.ModelForm):
     class Meta:
         model = Plant
-        fields = '__all__'
+        fields = ['name', 'description', 'soil', 'light', 'watering_frequency', 'image']
+
+        def clean_image(self):
+            image = self.cleaned_data.get('image')
+            if image and not image.content_type.startswith('image/'):
+                raise forms.ValidationError("Only image files are allowed.")
+            return image
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -19,18 +25,6 @@ class CustomUserCreationForm(UserCreationForm):
             if User.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
                 raise forms.ValidationError("This email is already in use.")
             return email
-
-# class EventForm(forms.ModelForm):
-#     class Meta:
-#         model = Event
-#         fields = ['plant','date','name','description']
-#         widgets = {
-#             'date': forms.DateInput(attrs={'class': 'datepicker'}, format='%Y-%m-%d'),
-#         }
-#
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.fields['date'].widget.input_type = 'date'
 
 class EventForm(forms.ModelForm):
     class Meta:
@@ -46,16 +40,16 @@ class EventForm(forms.ModelForm):
         if user:
             self.fields['plant'].queryset = Plant.objects.filter(ownedplants__owner=user)
 
-class WateringForm(forms.ModelForm):
-    class Meta:
-        model = Watering
-        fields = ['plant', 'fertiliser']  # Usuń 'user'
-
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-        if user:
-            self.fields['plant'].queryset = Plant.objects.filter(ownedplants__owner=user)
+# class WateringForm(forms.ModelForm):
+#     class Meta:
+#         model = Watering
+#         fields = ['plant', 'fertiliser']  # Usuń 'user'
+#
+#     def __init__(self, *args, **kwargs):
+#         user = kwargs.pop('user', None)
+#         super().__init__(*args, **kwargs)
+#         if user:
+#             self.fields['plant'].queryset = Plant.objects.filter(ownedplants__owner=user)
 
 from django import forms
 from django.contrib.auth.models import User

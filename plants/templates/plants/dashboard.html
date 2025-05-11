@@ -10,7 +10,8 @@
 {#                <button id="openWateringModal" class="all-buttons small-button">+</button>#}
                     <!-- Modal -->
                     <div id="wateringModal" style="display: none;">
-                        <form id="wateringForm" method="post" data-url="{% url 'add-watering' %}">
+{#                        <form id="wateringForm" method="post" data-url="{% url 'add-watering' %}">#}
+                        <form id="wateringForm" method="post">
                             <div id="wateringModalHeader">
                                 <h3>Add watering</h3>
                                 <p id="wateringCloseModal">&#x166D; </p>
@@ -43,10 +44,10 @@
                             <p>{{watering.next_watering| date:"d.m.Y"}}</p>
                         </div>
                         <div class="next-watering-controls">
-                            <p class="add-day all-buttons" title="Remove one day" data-watering-id="{{ watering.id }}" data-days=-1>-1</p>
-                            <p class="watering-done all-buttons" title="Mark as done" data-watering-id="{{ watering.id }}" data-fertilizer="False">Done</p>
-                            <p class="watering-done all-buttons" title="Mark as done" data-watering-id="{{ watering.id }}" data-fertilizer="True">Done with fertilizer</p>
-                            <p class="add-day all-buttons" title="Add one day" data-watering-id="{{ watering.id }}" data-days=1>+1</p>
+                            <p class="add-day all-buttons" title="Remove one day" data-plant-id="{{ watering.plant.id }}" data-watering-id="{{ watering.id }}" data-days=-1>-1</p>
+                            <p class="watering-done all-buttons" title="Mark as done" data-plant-id="{{ watering.plant.id }}" data-watering-id="{{ watering.id }}" data-fertilizer="False">Done</p>
+                            <p class="watering-done all-buttons" title="Mark as done" data-plant-id="{{ watering.plant.id }}" data-watering-id="{{ watering.id }}" data-fertilizer="True">Done with fertilizer</p>
+                            <p class="add-day all-buttons" title="Add one day" data-plant-id="{{ watering.plant.id }}" data-watering-id="{{ watering.id }}" data-days=1>+1</p>
                         </div>
                     </div>
                     {% empty %}

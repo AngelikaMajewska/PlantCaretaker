@@ -108,10 +108,13 @@ class SoilType(models.Model):
 class OwnedPlants(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     plant=models.ForeignKey(Plant, on_delete=models.CASCADE)
-    owner_watering_frequency = models.IntegerField(validators=[MinValueValidator(1)], default=3)
+    owner_watering_frequency = models.IntegerField(null=True,blank=True,validators=[MinValueValidator(1)])
 
     class Meta:
         unique_together = (('owner', 'plant'),)
+        permissions = [
+            ("can_diagnose", "Can diagnose plants"),
+        ]
 
     def __str__(self):
         return f"{self.owner}, {self.plant}"

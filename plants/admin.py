@@ -3,7 +3,7 @@ from django.contrib import admin
 from plants.models import Plant, Event, SoilType, SoilIngredient, PlantDetailComments, OwnedPlants, WishList, UserNotes, \
     Watering, AIRating, PlantTips,UserLocation
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 
 admin.site.register(Event)
 admin.site.register(SoilType)
@@ -13,6 +13,7 @@ admin.site.register(OwnedPlants)
 admin.site.register(WishList)
 admin.site.register(AIRating)
 admin.site.register(PlantTips)
+admin.site.register(Permission)
 
 @admin.register(Plant)
 class PlantAdmin(admin.ModelAdmin):

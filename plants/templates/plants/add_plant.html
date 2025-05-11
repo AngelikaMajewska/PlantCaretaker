@@ -4,7 +4,28 @@
 {% block content %}
   <form method="post" enctype="multipart/form-data" class="add-plant-form tile-background">
     {% csrf_token %}
-    {{ form.as_table}}
+    
+    <label for="{{ form.name.id_for_label }}">Name:</label>
+    {{ form.name }}
+    
+    <label for="{{ form.description.id_for_label }}">Description:</label>
+    {{ form.description }}
+
+    <label for="{{ form.soil.id_for_label }}">Soil:</label>
+    {{ form.soil }}
+
+    <label for="{{ form.light.id_for_label }}">Light:</label>
+    {{ form.light }}
+
+    <label for="{{ form.watering_frequency.id_for_label }}">Watering frequency (days):</label>
+    {{ form.watering_frequency }}
+
+    <div class="custom-file-upload">
+      <label for="id_image" class="file-label big-button all-buttons">Upload your image</label>
+      {{ form.image }}
+      <span id="file-name">No file chosen</span>
+    </div>
+
     <input type="submit" value="Submit" class="add-plant-form-button all-buttons big-button">
   </form>
 {% endblock %}

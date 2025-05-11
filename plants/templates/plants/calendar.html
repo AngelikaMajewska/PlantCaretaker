@@ -51,26 +51,44 @@
                 </form>
             </div>
             {% for event in events %}
-            <div class="user-event">
-                <div class="user-event-header font-details-color">
-                    <div class="user-event-header-section">
-                        <p>{{event.name}}</p>
-                        <p>{{event.date| date:"d.m.Y"}}</p>
+                <div class="user-event">
+                    <div class="user-event-header font-details-color">
+                        <div class="user-event-header-section">
+                            <p>{{event.name}}</p>
+                            <p>{{event.date| date:"d.m.Y"}}</p>
+                        </div>
+                            <div class="user-event-header-buttons">
+                                <p class="cancel-event" title="Cancel" data-event-id="{{ event.id }}">&#x20E0;</p>
+                                <p class="finish-event" title="Finish" data-event-id="{{ event.id }}">&#x2713;</p>
+            {#                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">#}
+                                <!--                          <a href="#" id="move-event">&#x2192;</a>-->
+                            </div>
                     </div>
-                    <div class="user-event-header-buttons">
-                        <p class="cancel-event" title="Cancel" data-event-id="{{ event.id }}">&#x20E0;</p>
-                        <p class="finish-event" title="Finish" data-event-id="{{ event.id }}">&#x2713;</p>
-    {#                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">#}
-                        <!--                          <a href="#" id="move-event">&#x2192;</a>-->
+                    <div class="user-event-details">
+                        <p><strong class="header-style">Plant:</strong> {% if event.plant %} {{ event.plant.name }} {% else %} Unassigned {% endif %}</p>
+                        <p><strong class="header-style">Description:</strong> {{ event.description }}</p>
                     </div>
                 </div>
-                <div class="user-event-details">
-                    <p><strong class="header-style">Plant:</strong> {% if event.plant %} {{ event.plant.name }} {% else %} Unassigned {% endif %}</p>
-                    <p><strong class="header-style">Description:</strong> {{ event.description }}</p>
-                </div>
-            </div>
             {% empty %}
-            <p>No events added.</p>
+                <p>No events added.</p>
+            {% endfor %}
+        
+            <h3>Finished events</h3>
+            {% for event in finished_events %}
+                <div class="user-event">
+                    <div class="user-event-header font-details-color">
+                        <div class="user-finished-event-header-section">
+                            <p>{{event.name}}</p>
+                            <p>{{event.date| date:"d.m.Y"}}</p>
+                        </div>
+                    </div>
+                    <div class="user-event-details">
+                        <p><strong class="header-style">Plant:</strong> {% if event.plant %} {{ event.plant.name }} {% else %} Unassigned {% endif %}</p>
+                        <p><strong class="header-style">Description:</strong> {{ event.description }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No events added.</p>
             {% endfor %}
         </div>
         <div class="calendar-box">
@@ -81,7 +99,7 @@
     <script>
       document.addEventListener('DOMContentLoaded', function() {
       var calendarEl = document.getElementById('calendar');
-      var eventListEl = document.getElementById('event-list'); // <-- miejsce na listę eventów
+      var eventListEl = document.getElementById('event-list'); 
 
       var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',

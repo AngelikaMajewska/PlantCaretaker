@@ -59,58 +59,59 @@
             </div>
         </div>
     </div>
-    <div class="ai-rating-container tile-background">
-        <div class="ai-rating-sumup">
-            <div class="diagnosis-box">
-                <h3 class="section-header">Plant diagnosis</h3>
-                <p class="font-details-color">To receive a diagnosis regarding the state of this plant, please click the button below. Option to upload a picture will show. Use it, click Diagnose and wait for a pop-up window with comment.</br>After closing the window, the data will automatically be added to the table and chart below.</p>
-                <button class="diagnose-btn all-buttons big-button" data-plant-id="{{ plant.id }}">Diagnose</button>
-                <div style="display: block">
-                    <!-- Modal z formularzem -->
-                    <div id="diagnoseModal" style="display:none;">
-                        <form id="diagnoseForm" enctype="multipart/form-data" data-url="{% url 'diagnose-plant' %}">
-                            {% csrf_token %}
-                            <input type="file" name="image" id="fileInput" accept="image/*" required hidden>
-                            <label for="fileInput" class="file-upload-button all-buttons big-button">📷 Choose image</label>
-                            <span id="fileName">No file selected</span>
-                            <input type="hidden" name="plant_id" id="plantIdInput">
-                            <button class="all-buttons big-button" type="submit">Send for analysis</button>
-                        </form>
-                    </div>
-                </div>
-            <h3 class="section-header rating-history-header">History of ratings</h3>
-            </div>
-            <div class="ai-plotly-chart">
-                {{ plotly_chart|safe }}
-            </div>
-        </div>
-        <div class="ai-rating-notes">
-            <h3 class="ai-rating-header section-header">AI ratings</h3>
-            {% if ai_rating %}
-                <div class="ai-ratings-all">
-                    <div class="ai-rating scroll">
-                        <div class="ai-rating-list-header">
-                            <p class="ai-rating-list-note-date header-style">Date</p>
-                            <p class="ai-rating-list-note-content header-style">Note</p>
+    {% if can_diagnose %}
+        <div class="ai-rating-container tile-background">
+            <div class="ai-rating-sumup">
+                
+                <div class="diagnosis-box">
+                    <h3 class="section-header">Plant diagnosis</h3>
+                    <p class="font-details-color">To receive a diagnosis regarding the state of this plant, please click the button below. Option to upload a picture will show. Use it, click Diagnose and wait for a pop-up window with comment.</br>After closing the window, the data will automatically be added to the table and chart below.</p>
+                    <button class="diagnose-btn all-buttons big-button" data-plant-id="{{ plant.id }}">Diagnose</button>
+                    <div style="display: block">
+                        <!-- Modal z formularzem -->
+                        <div id="diagnoseModal" style="display:none;">
+                            <form id="diagnoseForm" enctype="multipart/form-data" data-url="{% url 'diagnose-plant' %}">
+                                {% csrf_token %}
+                                <input type="file" name="image" id="fileInput" accept="image/*" required hidden>
+                                <label for="fileInput" class="file-upload-button all-buttons big-button">📷 Choose image</label>
+                                <span id="fileName">No file selected</span>
+                                <input type="hidden" name="plant_id" id="plantIdInput">
+                                <button class="all-buttons big-button" type="submit">Send for analysis</button>
+                            </form>
                         </div>
-                        {% for rating in ai_rating %}
-                            <div class="ai-rating-list-note">
-                                <p class="ai-rating-list-note-date ">{{rating.date | date:"d.m.Y"}}</p>
-                                <p class="ai-rating-list-note-content font-details-color">{{rating.note}}</p>
-                            </div>
-                            {% empty %}
-                                <p>No AI ratings.</p>
-                        {% endfor %}
                     </div>
+                    {% if plotly_chart %}
+                    <h3 class="section-header rating-history-header">History of ratings</h3>
+                    {% endif %}
                 </div>
-            {% else %}
-                <p>No rating in database.</p>
-            {% endif %}
+                <div class="ai-plotly-chart">
+                    {{ plotly_chart|safe }}
+                </div>
+            </div>
+            <div class="ai-rating-notes">
+                <h3 class="ai-rating-header section-header">AI ratings</h3>
+                {% if ai_rating %}
+                    <div class="ai-ratings-all">
+                        <div class="ai-rating scroll">
+                            <div class="ai-rating-list-header">
+                                <p class="ai-rating-list-note-date header-style">Date</p>
+                                <p class="ai-rating-list-note-content header-style">Note</p>
+                            </div>
+                            {% for rating in ai_rating %}
+                                <div class="ai-rating-list-note">
+                                    <p class="ai-rating-list-note-date ">{{rating.date | date:"d.m.Y"}}</p>
+                                    <p class="ai-rating-list-note-content font-details-color">{{rating.note}}</p>
+                                </div>
+                                {% empty %}
+                                    <p>No AI ratings.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <p>No rating in database.</p>
+                {% endif %}
+            </div>
         </div>
-    </div>
-
-
-
-
+    {% endif %}
 </div>
 {% endblock %}

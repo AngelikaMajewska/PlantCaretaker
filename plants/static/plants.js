@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // changing next watering date by +-1 day
     const addDay = document.querySelectorAll('.add-day')
     if(addDay) {
-        handleButtonClick('.add-day', btn => ({watering_id: btn.dataset.wateringId, days: btn.dataset.days }), "/move-watering/");
+        handleButtonClick('.add-day', btn => ({watering_id: btn.dataset.wateringId, days: btn.dataset.days, plant_id: btn.dataset.plantId }), "/move-watering/");
     }
     // marking watering as done(with and without fertilizer)
     const wateringDone = document.querySelectorAll('.watering-done')
@@ -237,5 +237,13 @@ document.addEventListener("DOMContentLoaded", function() {
             const fileName = this.files[0]?.name || "No file selected";
             document.getElementById("fileName").textContent = fileName;
         });
+    }
+    const fileInput = document.getElementById('id_image');
+    const fileNameSpan = document.getElementById('file-name');
+    if(fileInput && fileNameSpan)
+    {
+       fileInput.addEventListener('change', function () {
+          fileNameSpan.textContent = this.files.length > 0 ? this.files[0].name : 'No file chosen';
+       });
     }
 });

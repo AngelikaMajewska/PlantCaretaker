@@ -264,7 +264,7 @@ footer{
     min-height: 60%;
     width: 30%;
     margin-right: 20px;
-    padding:10px;
+    padding:0 10px 10px 10px;
 }
 .event-list-header{
     display: flex;
@@ -279,7 +279,7 @@ footer{
     background-color: white;
 }
 .event-list h2{
-    margin-top:5px;
+    margin-top:0;
     margin-bottom: 5px;
     padding-left: 5px;
 }
@@ -350,6 +350,13 @@ footer{
     justify-content: space-between;
     align-content: center;
     width:85%;
+}
+.user-finished-event-header-section{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: center;
+    width: 100%;
 }
 .user-event-header-buttons{
     display: flex;
@@ -465,6 +472,8 @@ footer{
 .add-plant-form{
     display: flex;
     flex-direction: column;
+    padding: 30px;
+    width: 35%;
 }
 .add-plant-form label {
     font-weight: bold;
@@ -517,6 +526,27 @@ footer{
     background-size: 1.2rem;
     transition: border-color 0.3s;
     margin-bottom: 10px;
+}
+.custom-file-upload{
+    overflow: hidden;
+    height: 30px;
+    widtH: 100%
+}
+.custom-file-upload input[type="file"] {
+  display: none;
+}
+.file-label {
+    display: inline-block;
+    cursor: pointer;
+    padding:5px !important;
+    font-weight: normal !important;
+    font-family: inherit !important;
+}
+
+#file-name {
+    margin-left: 10px;
+    font-style: italic;
+    overflow: hidden;
 }
 /* ---------------------------------------------------------- */
 /*                       plant detail                         */
@@ -1290,6 +1320,9 @@ footer{
 #note-form{
     display: flex;
     flex-direction: column;
+}
+#note-form button{
+    align-self: center;
 }
 .note-box{
     border: 1px solid #d6d6d6;

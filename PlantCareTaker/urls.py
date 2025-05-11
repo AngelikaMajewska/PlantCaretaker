@@ -22,11 +22,11 @@ from django.urls import path
 from plants import views
 from plants.views import (HomepageView, AddPlantView, CalendarView, CatalogView, PlantDetailView,
                           DashboardView, RegisterView, AddEventView,  DiagnosePlantView,
-                          OwnedPlantDetailView, AddWateringView, UserProfileView, AddCommentView,
+                          OwnedPlantDetailView, UserProfileView, AddCommentView,
                           ChangeWateringFrequencyView, RemoveFromWishlistView,AddToWishlistView,
                           FinishWateringView, MoveWateringView, WishlistRemoveView, AddNoteView,
                           WishlistBoughtView, FinishEventView, CancelEventView, GeneratePDFView,
-                          AllEventsView)
+                          )
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -34,7 +34,7 @@ urlpatterns = [
     path("", HomepageView.as_view(), name="home"),
     path("addplant/", AddPlantView.as_view(), name="addplant"),
     path('calendar/', CalendarView.as_view(), name='calendar'),
-    path('all-events/', AllEventsView.as_view(), name='all_events'),
+    # path('all-events/', AllEventsView.as_view(), name='all_events'),
     path('catalog/',CatalogView.as_view(), name='catalog'),
     path('plants/<int:pk>/', PlantDetailView.as_view(), name='plant-detail'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
@@ -51,7 +51,6 @@ urlpatterns = [
     path('add-note/', AddNoteView.as_view(), name='add-note'),
     path('wishlist-remove/', WishlistRemoveView.as_view(), name='wishlist-remove'),
     path('wishlist-bought/', WishlistBoughtView.as_view(), name='wishlist-bought'),
-    path('add-watering/', AddWateringView.as_view(), name='add-watering'),
     path('move-watering/', MoveWateringView.as_view(), name='move-watering'),
     path('finish-watering/', FinishWateringView.as_view(), name='finish-watering'),
     path('profile/', UserProfileView.as_view(), name='profile'),

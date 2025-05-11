@@ -78,6 +78,7 @@
                 </span>
             {% endif %}
         </div>
+        {%  if user.is_authenticated %}
         <div class="add-comment-form">
             <form id="comment-form" data-url="{% url 'add-comment' %}">
                 {% csrf_token %}
@@ -87,6 +88,7 @@
                 <button type="submit" class="all-buttons big-button font-details-size">Add</button>
             </form>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
