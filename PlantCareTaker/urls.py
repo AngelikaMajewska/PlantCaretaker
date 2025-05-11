@@ -26,7 +26,7 @@ from plants.views import (HomepageView, AddPlantView, CalendarView, CatalogView,
                           ChangeWateringFrequencyView, RemoveFromWishlistView,AddToWishlistView,
                           FinishWateringView, MoveWateringView, WishlistRemoveView, AddNoteView,
                           WishlistBoughtView, FinishEventView, CancelEventView, GeneratePDFView,
-                          )
+                          AllEventsView)
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -34,7 +34,7 @@ urlpatterns = [
     path("", HomepageView.as_view(), name="home"),
     path("addplant/", AddPlantView.as_view(), name="addplant"),
     path('calendar/', CalendarView.as_view(), name='calendar'),
-    # path('all-events/', AllEventsView.as_view(), name='all_events'),
+    path('all-events/', AllEventsView.as_view(), name='all_events'),
     path('catalog/',CatalogView.as_view(), name='catalog'),
     path('plants/<int:pk>/', PlantDetailView.as_view(), name='plant-detail'),
     path('dashboard/', DashboardView.as_view(), name='dashboard'),

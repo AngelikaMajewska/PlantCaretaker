@@ -60,14 +60,6 @@ class AIRating(models.Model):
     note = models.TextField(default='')
     date = models.DateField(auto_now_add=True)
 
-    def save(self, *args, **kwargs):
-        match = re.search(r'Rating: ([1-5])', self.note)
-        if match:
-            self.rating = int(match.group(1))
-        else:
-            self.rating = 0
-        super().save(*args, **kwargs)
-
 
 class Watering(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

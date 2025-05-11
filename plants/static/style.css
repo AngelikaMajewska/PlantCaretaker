@@ -283,6 +283,9 @@ footer{
     margin-bottom: 5px;
     padding-left: 5px;
 }
+.finished-events-header{
+    margin:10px 0 0 5px;
+}
 .calendar-box{
     width: 70%;
     height: 100%;
@@ -1349,6 +1352,9 @@ footer{
     margin-top:0;
     padding:0 10px;
 }
+.diagnosis-description{
+    text-align: justify;
+}
 .diagnosis-box{
     display: flex;
     flex-direction: column;
@@ -1457,23 +1463,32 @@ footer{
 }
 .ai-rating-list-note-date,
 .ai-rating-list-note-content {
-    display: flex;           /* pozwala kontrolować układ wewnątrz */
-    align-items: center;     /* środek w pionie */
-    justify-content: center; /* środek w poziomie (dla daty) */
+    display: flex;
+    align-items: center;
     padding: 5px;
     margin: 0;
 }
 .ai-rating-list-note-date {
+    justify-content: center;
     background-color: #e3ecbf;
     border-radius: 30px 0 0 30px;
     width: 18%;
     color: #6e7a40;
 }
 .ai-rating-list-note-content {
+    flex-direction: column;
+    justify-content: left;
     background-color: #f4f8e5;
     border-radius: 0 30px 30px 0;
     width: 82%;
-    padding-left: 10px;
+    padding: 5px 5px 10px 10px;
+    height: fit-content;
+}
+.ai-rating-list-note-content p{
+    justify-self: left;
+    margin: 5px 5px 0 0;
+    text-align: justify;
+    width: 100%;
 }
 /**{*/
 /*    border: 1px solid black;*/

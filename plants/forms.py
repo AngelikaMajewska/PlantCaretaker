@@ -1,4 +1,8 @@
+from django.utils import timezone
+
 from django import forms
+from rest_framework.exceptions import ValidationError
+
 from .models import Plant, Event, OwnedPlants, Watering, UserLocation
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -39,6 +43,14 @@ class EventForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['plant'].queryset = Plant.objects.filter(ownedplants__owner=user)
+            self.fields['date'].widget.attrs['min'] = timezone.now().date().strftime('%Y-%m-%d')
+
+    def clean_date(self):
+        date = self.cleaned_data['date']
+        today = timezone.now().date()
+        if date < today:
+            raise ValidationError("Date cannot be earlier than today.")
+        return date
 
 # class WateringForm(forms.ModelForm):
 #     class Meta:

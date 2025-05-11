@@ -4,7 +4,7 @@
 {% block content %}
     <div class="calendar-whole tile-background">
         <div class="event-list scroll">
-            <div class="event-list-header font-details-color"><h2>Upcoming events</h2> <button id="openModal" class="all-buttons">+</button></div>
+            <div class="event-list-header font-details-color"><h2>Your events</h2> <button id="openModal" class="all-buttons">+</button></div>
             <!-- Modal -->
             <div id="eventModal" style="display: none;">
                 <form id="eventForm" method="post" data-url="{% url 'add-event' %}">
@@ -73,7 +73,7 @@
                 <p>No events added.</p>
             {% endfor %}
         
-            <h3>Finished events</h3>
+            <h3 class="section-header finished-events-header">Finished events</h3>
             {% for event in finished_events %}
                 <div class="user-event">
                     <div class="user-event-header font-details-color">

@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const url = this.dataset.url;
             if (!csrfToken) return;
             sendForm(url,formData,data => {
-                if (data.diagnosis) alert("Diagnosis:\n" + data.diagnosis);
+                if (data.diagnosis) alert("Rating:"+ data.diagnosis.rating +"\nDiagnosis:\n" + data.diagnosis.note);
                 else if (data.error) alert("Error:\n" + data.error);
                 else alert("Failed to get answer.");
                 const modal = document.getElementById('diagnoseModal');

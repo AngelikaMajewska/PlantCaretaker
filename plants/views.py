@@ -6,8 +6,6 @@ import requests
 from datetime import timedelta, date, datetime
 import plotly.graph_objs as go
 import plotly.offline as opy
-from django.contrib.admin.utils import flatten
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.paginator import Paginator
 from weasyprint import HTML
@@ -17,8 +15,6 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, FormView, DetailView, CreateView, View, UpdateView
 from django.http import JsonResponse, HttpResponseForbidden
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 
@@ -88,27 +84,27 @@ class CalendarView(TemplateView):
             context['finished_events'] = Event.objects.filter(user=user, is_finished=True).order_by('-date')
             return context
 
+# data for calendar
+class AllEventsView(View):
+    def get(self, request, *args, **kwargs):
+        events = Event.objects.filter(
+            user=request.user,
+            is_finished=False
+        ).select_related('plant').order_by('date')
 
-# class AllEventsView(View):
-#     def get(self, request, *args, **kwargs):
-#         events = Event.objects.filter(
-#             user=request.user,
-#             is_finished=False
-#         ).select_related('plant').order_by('date')
-#
-#         event_list = []
-#         for event in events:
-#             event_list.append({
-#                 'title': event.name,
-#                 'plant': {
-#                     'id': event.plant.id,
-#                     'name': event.plant.name,
-#                 } if event.plant else None,
-#                 'start': event.date.strftime("%Y-%m-%d"),
-#                 'description': event.description,
-#             })
-#
-#         return JsonResponse(event_list, safe=False)
+        event_list = []
+        for event in events:
+            event_list.append({
+                'title': event.name,
+                'plant': {
+                    'id': event.plant.id,
+                    'name': event.plant.name,
+                } if event.plant else None,
+                'start': event.date.strftime("%Y-%m-%d"),
+                'description': event.description,
+            })
+
+        return JsonResponse(event_list, safe=False)
 
 class CatalogView(TemplateView):
     template_name = 'plants/catalog.html'
@@ -261,7 +257,7 @@ class DiagnosePlantView(PermissionRequiredMixin,View):
             file = request.FILES.get('image')
             plant_id=int(request.POST.get('plant_id'))
             plant = get_object_or_404(Plant, pk=plant_id)
-            prompt = f"The photo is of {plant.name}. Rate the condition of the plant in this photo on a scale of 1-5, return a rating and provide possible causes of problems. Do not use markdown, limit yourself to 100 words."
+            prompt = f"The photo is of {plant.name}. Rate the condition of the plant in this photo on a scale of 1-5, return a rating and provide possible causes of problems. Do not use markdown, limit yourself to 100 words.Return result as dictionary with two variables - rating and note."
 
             # Read image data
             image_data = file.read()
@@ -302,7 +298,8 @@ class DiagnosePlantView(PermissionRequiredMixin,View):
             response = requests.post("https://api.x.ai/v1/chat/completions",headers=headers,json=payload)
             if response.status_code == 200:
                 result = response.json()["choices"][0]["message"]["content"]
-                AIRating.objects.create(plant=plant,user=self.request.user,note=result)
+                result=json.loads(result)
+                AIRating.objects.create(plant=plant,user=self.request.user,note=result['note'],rating=result['rating'])
                 return JsonResponse({ 'success': True, 'diagnosis': result})
             else:
                 return JsonResponse({'success': False,'error': f"API Error: {response.status_code}",'details': response.text }, status=500)
