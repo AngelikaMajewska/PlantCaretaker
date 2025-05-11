@@ -21,7 +21,7 @@
                         <div class="error">{{ event_form.plant.errors }}</div>
                         {% endif %}
                     </div>
-    
+
                     <div class="form-group">
                         <label for="{{ event_form.date.id_for_label }}">{{ event_form.date.label }}</label>
                         {{ event_form.date }}
@@ -29,7 +29,7 @@
                         <div class="error">{{ event_form.date.errors }}</div>
                         {% endif %}
                     </div>
-    
+
                     <div class="form-group">
                         <label for="{{ event_form.name.id_for_label }}">{{ event_form.name.label }}</label>
                         {{ event_form.name }}
@@ -37,7 +37,7 @@
                         <div class="error">{{ event_form.name.errors }}</div>
                         {% endif %}
                     </div>
-    
+
                     <div class="form-group">
                         <label for="{{ event_form.description.id_for_label }}">{{ event_form.description.label }}</label>
                         {{ event_form.description }}
@@ -72,7 +72,7 @@
             {% empty %}
                 <p>No events added.</p>
             {% endfor %}
-        
+
             <h3 class="section-header finished-events-header">Finished events</h3>
             {% for event in finished_events %}
                 <div class="user-event">
@@ -95,11 +95,11 @@
             <div id="calendar"></div>
         </div>
     </div>
-    
+
     <script>
       document.addEventListener('DOMContentLoaded', function() {
       var calendarEl = document.getElementById('calendar');
-      var eventListEl = document.getElementById('event-list'); 
+      var eventListEl = document.getElementById('event-list');
 
       var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',

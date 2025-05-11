@@ -514,11 +514,13 @@ class WishlistBoughtView(LoginRequiredMixin,View):
         try:
             data = json.loads(request.body)
             plant_id = int(data.get("plant_id"))
+            plant= get_object_or_404(Plant, pk=plant_id)
             owner_id = request.user.pk
             wishlist_plant = get_object_or_404(WishList, plant_id=plant_id, owner_id=owner_id)
-            owned, created = OwnedPlants.objects.get_or_create(plant_id=plant_id, owner_id=owner_id)
+            record = OwnedPlants.objects.create_owned_plant_with_watering(owner=request.user,plant=plant)
+            # owned, created = OwnedPlants.objects.get_or_create(plant_id=plant_id, owner_id=owner_id)
             wishlist_plant.delete()
-            return JsonResponse({"success": True, "created": created})
+            return JsonResponse({"success": True})
 
         except WishList.DoesNotExist:
             return JsonResponse({"success": False, "error": "Plant not found on wishlist."})
@@ -643,16 +645,19 @@ class RemoveFromWishlistView(LoginRequiredMixin,View):
 
     def get(self, request, *args, **kwargs):
         return JsonResponse({"success": False, "error": "Invalid request method."})
-class ChangeWateringFrequencyView(LoginRequiredMixin,View):
+class ChangeWateringFrequencyView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         try:
             plant_id = int(request.POST.get("plant_id"))
-            owner_id = self.request.user.pk
             frequency = int(request.POST.get("frequency"))
+            plant = get_object_or_404(Plant, pk=plant_id)
 
-            record = get_object_or_404(OwnedPlants, owner_id=owner_id, plant_id=plant_id)
-            record.owner_watering_frequency = frequency
-            record.save()
+            OwnedPlants.objects.watering_frequency_change(
+                owner=request.user,
+                plant=plant,
+                new_watering_frequency=frequency
+            )
+
             return JsonResponse({"success": True})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
