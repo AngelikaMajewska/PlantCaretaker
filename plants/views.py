@@ -162,7 +162,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         sorted_waterings = sorted([w for w in last_waterings if w], key=lambda w: w.next_watering)
         context['waterings'] = sorted_waterings
         context['wishlist'] = WishList.objects.filter(owner=user).select_related('plant')
-        location=UserLocation.objects.get(user=self.request.user)
+        location = get_object_or_404(UserLocation, user=self.request.user)
         weather_tip = generate_weather_tip(location.city)
         context['weather_tip'] = weather_tip
         return context
@@ -250,7 +250,6 @@ class GeneratePDFView(LoginRequiredMixin,View):
         response['Content-Disposition'] = 'attachment; filename="month_planner.pdf"'
         return response
 
-@method_decorator(csrf_exempt, name='dispatch')
 class DiagnosePlantView(PermissionRequiredMixin,View):
     permission_required = ('plants.can_diagnose',)
     def post(self, request):
@@ -261,7 +260,7 @@ class DiagnosePlantView(PermissionRequiredMixin,View):
             # Get file from request
             file = request.FILES.get('image')
             plant_id=int(request.POST.get('plant_id'))
-            plant = Plant.objects.get(pk=plant_id)
+            plant = get_object_or_404(Plant, pk=plant_id)
             prompt = f"The photo is of {plant.name}. Rate the condition of the plant in this photo on a scale of 1-5, return a rating and provide possible causes of problems. Do not use markdown, limit yourself to 100 words."
 
             # Read image data
@@ -349,69 +348,69 @@ def generate_plotly_chart(labels, values):
     return chart_html
 
 def get_watering_differences(plant_id):
-    waterings = Watering.objects.filter(plant_id=plant_id).order_by('date')
+    if Watering.objects.filter(plant_id=plant_id).exists():
+        waterings = Watering.objects.filter(plant_id=plant_id).order_by('date')
+        dates = [w.date for w in waterings]
+        fertilisers = [w.fertiliser for w in waterings]
 
-    dates = [w.date for w in waterings]
-    fertilisers = [w.fertiliser for w in waterings]
+        diffs = []
+        marker_colors = []
+        for i in range(1, len(dates)):
+            delta = (dates[i] - dates[i - 1]).days
+            diffs.append(delta)
+            # Kolor zależny od fertiliser
+            if fertilisers[i]:  # current watering
+                marker_colors.append('rgba(86, 89, 0, 1)')  # np. pomarańczowy dla nawożenia
+            else:
+                marker_colors.append('rgba(160, 166, 98, 1)')  # zielony dla zwykłego podlewania
 
-    diffs = []
-    marker_colors = []
-    for i in range(1, len(dates)):
-        delta = (dates[i] - dates[i - 1]).days
-        diffs.append(delta)
-        # Kolor zależny od fertiliser
-        if fertilisers[i]:  # current watering
-            marker_colors.append('rgba(86, 89, 0, 1)')  # np. pomarańczowy dla nawożenia
-        else:
-            marker_colors.append('rgba(160, 166, 98, 1)')  # zielony dla zwykłego podlewania
+        # Oś X: daty bez pierwszej (bo różnice są między parą)
+        x = dates[1:]
+        y = diffs
 
-    # Oś X: daty bez pierwszej (bo różnice są między parą)
-    x = dates[1:]
-    y = diffs
+        trace = go.Scatter(
+            x=x,
+            y=y,
+            mode='lines+markers',
+            name='Days between registered waterings',
+            line=dict(color='rgba(194, 209, 128, 1)', width=3, dash='solid'),
+            marker=dict(size=8, color=marker_colors, symbol='circle'),
+            text=[f"{date} - {days} days (Fertilizer: {'Yes' if fert else 'No'})" for date, days, fert in
+                  zip(x, y, fertilisers[1:])],
+            hoverinfo='text'
+        )
 
-    trace = go.Scatter(
-        x=x,
-        y=y,
-        mode='lines+markers',
-        name='Days between registered waterings',
-        line=dict(color='rgba(194, 209, 128, 1)', width=3, dash='solid'),
-        marker=dict(size=8, color=marker_colors, symbol='circle'),
-        text=[f"{date} - {days} days (Fertilizer: {'Yes' if fert else 'No'})" for date, days, fert in
-              zip(x, y, fertilisers[1:])],
-        hoverinfo='text'
-    )
+        layout = go.Layout(
+            xaxis=dict(
+                title='Date',
+                tickangle=-45,
+                gridcolor='rgba(242, 246, 226, 1)',
+                zeroline=False
+            ),
+            yaxis=dict(
+                title='Days since last watering',
+                gridcolor='lightgrey',
+                zeroline=False,
+                dtick=0.5
+            ),
+            plot_bgcolor='rgba(242, 246, 226, 1)',
+            paper_bgcolor='white',
+            font=dict(family='Verdana', size=12, color='rgba(86, 89, 0, 1)'),
+            margin=dict(l=30, r=30, t=30, b=30),
+            width=500,
+            height=300
+        )
 
-    layout = go.Layout(
-        xaxis=dict(
-            title='Date',
-            tickangle=-45,
-            gridcolor='rgba(242, 246, 226, 1)',
-            zeroline=False
-        ),
-        yaxis=dict(
-            title='Days since last watering',
-            gridcolor='lightgrey',
-            zeroline=False,
-            dtick=0.5
-        ),
-        plot_bgcolor='rgba(242, 246, 226, 1)',
-        paper_bgcolor='white',
-        font=dict(family='Verdana', size=12, color='rgba(86, 89, 0, 1)'),
-        margin=dict(l=30, r=30, t=30, b=30),
-        width=500,
-        height=300
-    )
-
-    fig = go.Figure(data=[trace], layout=layout)
-    chart_html = opy.plot(fig, auto_open=False, output_type='div')
-    return chart_html
+        fig = go.Figure(data=[trace], layout=layout)
+        chart_html = opy.plot(fig, auto_open=False, output_type='div')
+        return chart_html
 
 class OwnedPlantDetailView(LoginRequiredMixin,TemplateView):
     template_name = 'plants/owned_plants.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         plant_id = int(self.kwargs['pk'])
-        plant = Plant.objects.get(pk=plant_id)
+        plant = get_object_or_404(Plant, pk=plant_id)
         if OwnedPlants.objects.filter(plant_id=plant_id,owner_id = self.request.user).exists():
             context['plant'] = plant
             user_notes = UserNotes.objects.filter(user_id=self.request.user.pk, plant_id = plant_id).order_by('-date')
@@ -449,7 +448,7 @@ class FinishEventView(LoginRequiredMixin,View):
         try:
             data = json.loads(request.body)
             event_id = int(data.get("event_id"))
-            event = Event.objects.get(pk=event_id)
+            event = get_object_or_404(Event, pk=event_id)
             if event.user == request.user:
                 event.is_finished = True
                 event.date = datetime.today()
@@ -468,7 +467,7 @@ class CancelEventView(LoginRequiredMixin,View):
         try:
             data = json.loads(request.body)
             event_id = int(data.get("event_id"))
-            event = Event.objects.get(id=event_id)
+            event = get_object_or_404(Event, pk=event_id)
             if event.user == request.user:
                 event.delete()
             return JsonResponse({"success": True})
@@ -503,9 +502,8 @@ class WishlistRemoveView(LoginRequiredMixin,View):
             data = json.loads(request.body)
             plant_id = int(data.get("plant_id"))
             owner_id = request.user.pk
-            if WishList.objects.filter(plant_id=plant_id, owner_id=owner_id).exists():
-                wishlist_plant = WishList.objects.get(plant_id=plant_id, owner_id=owner_id)
-                wishlist_plant.delete()
+            wishlist_plant = get_object_or_404(WishList, plant_id=plant_id, owner_id=owner_id)
+            wishlist_plant.delete()
             return JsonResponse({"success": True})
         except WishList.DoesNotExist:
             return JsonResponse({"success": False, "error": "Plant not found on wishlist"})
@@ -520,10 +518,9 @@ class WishlistBoughtView(LoginRequiredMixin,View):
             data = json.loads(request.body)
             plant_id = int(data.get("plant_id"))
             owner_id = request.user.pk
-            if WishList.objects.filter(plant_id=plant_id, owner_id=owner_id).exists():
-                wishlist_plant = WishList.objects.get(plant_id=plant_id, owner_id=owner_id)
-                owned, created = OwnedPlants.objects.get_or_create(plant_id=plant_id, owner_id=owner_id)
-                wishlist_plant.delete()
+            wishlist_plant = get_object_or_404(WishList, plant_id=plant_id, owner_id=owner_id)
+            owned, created = OwnedPlants.objects.get_or_create(plant_id=plant_id, owner_id=owner_id)
+            wishlist_plant.delete()
             return JsonResponse({"success": True, "created": created})
 
         except WishList.DoesNotExist:
@@ -563,11 +560,11 @@ class FinishWateringView(LoginRequiredMixin,View):
             fertilizer = data.get("fertilizer")
             fertilizer = True if fertilizer == "True" else False
 
-            watering = Watering.objects.get(pk=watering_id)
+            watering = get_object_or_404(Watering, pk=watering_id)
             user_id = request.user.pk
             plant_id = watering.plant.pk
 
-            user_plant = OwnedPlants.objects.get(owner=request.user, plant=plant_id)
+            user_plant = get_object_or_404(OwnedPlants, owner=request.user, plant=plant_id)
             user_watering_frequency = user_plant.owner_watering_frequency
             if user_watering_frequency:
                 freq = user_watering_frequency
@@ -624,7 +621,6 @@ class AddToWishlistView(LoginRequiredMixin,View):
             data = json.loads(request.body)
             plant_id = int(data.get("plant_id"))
             owner_id = self.request.user.pk
-
             if WishList.objects.filter(owner_id=owner_id, plant_id=plant_id).exists():
                 return JsonResponse({"success": False, "error": "Plant already in wishlist."})
             if Plant.objects.filter(pk=plant_id).exists():
@@ -641,13 +637,9 @@ class RemoveFromWishlistView(LoginRequiredMixin,View):
             data = json.loads(request.body)
             plant_id = int(data.get("plant_id"))
             owner_id = request.user.pk
-
-            if WishList.objects.filter(owner_id=owner_id, plant_id=plant_id).exists():
-                record = WishList.objects.get(owner_id=owner_id, plant_id=plant_id)
-                record.delete()
-                return JsonResponse({"success": True})
-
-            return JsonResponse({"success": False, "error": "Plant not in the wishlist."})
+            record = get_object_or_404(WishList, owner_id=owner_id, plant_id=plant_id)
+            record.delete()
+            return JsonResponse({"success": True})
 
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
@@ -661,14 +653,10 @@ class ChangeWateringFrequencyView(LoginRequiredMixin,View):
             owner_id = self.request.user.pk
             frequency = int(request.POST.get("frequency"))
 
-            if OwnedPlants.objects.filter(owner_id=owner_id, plant_id=plant_id).exists():
-                record = OwnedPlants.objects.get(owner_id=owner_id, plant_id=plant_id)
-                record.owner_watering_frequency = frequency
-                record.save()
-                return JsonResponse({"success": True})
-
-            return JsonResponse({"success": False, "error": "Operation unsuccessful."})
-
+            record = get_object_or_404(OwnedPlants, owner_id=owner_id, plant_id=plant_id)
+            record.owner_watering_frequency = frequency
+            record.save()
+            return JsonResponse({"success": True})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
 
@@ -677,6 +665,7 @@ class ChangeWateringFrequencyView(LoginRequiredMixin,View):
 class AddCommentView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
         try:
+
             data = json.loads(request.body)
             try:
                 plant_id = int(data.get("plant_id"))
@@ -704,18 +693,17 @@ class AddCommentView(LoginRequiredMixin,View):
 
 def generate_plant_pdf(request, pk):
     plant_id = int(pk)
-    if Plant.objects.filter(pk=plant_id).exists():
-        plant = Plant.objects.get(pk=plant_id)
-        plant_name = plant.name
+    plant = get_object_or_404(Plant, pk=plant_id)
+    plant_name = plant.name
 
-        context = {
-            'plant': plant,
-        }
+    context = {
+        'plant': plant,
+    }
 
-        html_string = render_to_string('plants/pdf_plant_detail_template.html', context)
-        html = HTML(string=html_string)
-        pdf_file = html.write_pdf()
+    html_string = render_to_string('plants/pdf_plant_detail_template.html', context)
+    html = HTML(string=html_string)
+    pdf_file = html.write_pdf()
 
-        response = HttpResponse(pdf_file, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{plant_name}_detail.pdf"'
-        return response
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{plant_name}_detail.pdf"'
+    return response
