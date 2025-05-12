@@ -3,37 +3,51 @@
 
 {% block content %}
 <div class="catalog">
-    <div class="plant-list">
-        {% if not results %}
-            {% for plant in plants %}
-                <div class="plant">
-                    <div class="plant-image">
-                        {% if plant.image %}
-                            <a href="{% url 'plant-detail' plant.pk %}"><img src="{{ plant.image.url }}" alt="{{ plant.name }}"></a>
-                        {% else %}
-                            <a href="{% url 'plant-detail' plant.pk %}"><img src="/static/images/default-plant.png" alt="Default plant image"></a>
-                        {% endif %}
-                    </div>
-                    <div class="plant-name" >
-                        <a href="{% url 'plant-detail' plant.pk %}" data-plant-id="{{ plant.id }}" data-user-id="{{ user.id }}" class="font-details-color">{{ plant.name }}</a>
-                        <p class="love-icon">
-                            {% if user.is_authenticated %}
-                                {% if plant.id in wishlist %}
-                                    <span data-add-url="{% url 'add-to-wishlist' %}" data-remove-url="{% url 'remove-from-wishlist' %}" data-user-id="{{ user.id }}" data-plant-id="{{ plant.id }}" class="hidden to-wishlist" >&#9825;</span><span data-add-url="{% url 'add-to-wishlist' %}" data-remove-url="{% url 'remove-from-wishlist' %}" data-user-id="{{ user.id }}" data-plant-id="{{ plant.id }}" class="wishlisted" title="On the wishlist">&#128154;</span>
-                                {% elif plant.id in owned_plants %}
-                                    <span title="Owned">&#x1F331;</span>
-                                {% else %}
-                                    <span data-add-url="{% url 'add-to-wishlist' %}" data-remove-url="{% url 'remove-from-wishlist' %}" data-user-id="{{ user.id }}" data-plant-id="{{ plant.id }}" class="to-wishlist" title="Add to the wishlist">&#9825;</span><span data-add-url="{% url 'add-to-wishlist' %}" data-remove-url="{% url 'remove-from-wishlist' %}" data-user-id="{{ user.id }}" data-plant-id="{{ plant.id }}" class="hidden wishlisted">&#128154;</span>
-                                {% endif %}
-                            {% endif %}
-                        </p>
-{#                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">#}
-                    </div>
+    {% if can_diagnose %}
+        <div class="diagnosis-box">
+            <h3 class="section-header">Guess the plant</h3>
+            <p>If you can't find the plant that you are looking for in the catalog below, upload it here, and we'll identify it for you.</p>
+            <button class="check-button all-buttons big-button">Check</button>
+            <div style="display: block">
+                <div id="checkModal" style="display:none;">
+                    <form id="checkForm" enctype="multipart/form-data" data-url="{% url 'check-plant' %}">
+                        {% csrf_token %}
+                        <input type="file" name="image" id="photoInput" accept="image/*" required hidden>
+                        <label for="photoInput" class="file-upload-button all-buttons big-button">📷 Choose image</label>
+                        <span id="photoName">No file selected</span>
+                        <button class="all-buttons big-button" type="submit">Send for analysis</button>
+                    </form>
                 </div>
-            {% endfor %}
-        {% else %}
-            {{results}}
-        {% endif %}
+            </div>
+        </div>
+    {% endif %}
+    <div class="plant-list">
+        {% for plant in plants %}
+            <div class="plant">
+                <div class="plant-image">
+                    {% if plant.image %}
+                        <a href="{% url 'plant-detail' plant.pk %}"><img src="{{ plant.image.url }}" alt="{{ plant.name }}"></a>
+                    {% else %}
+                        <a href="{% url 'plant-detail' plant.pk %}"><img src="/static/images/default-plant.png" alt="Default plant image"></a>
+                    {% endif %}
+                </div>
+                <div class="plant-name" >
+                    <a href="{% url 'plant-detail' plant.pk %}" data-plant-id="{{ plant.id }}" data-user-id="{{ user.id }}" class="font-details-color">{{ plant.name }}</a>
+                    <p class="love-icon">
+                        {% if user.is_authenticated %}
+                            {% if plant.id in wishlist %}
+                                <span data-add-url="{% url 'add-to-wishlist' %}" data-remove-url="{% url 'remove-from-wishlist' %}" data-user-id="{{ user.id }}" data-plant-id="{{ plant.id }}" class="hidden to-wishlist" >&#9825;</span><span data-add-url="{% url 'add-to-wishlist' %}" data-remove-url="{% url 'remove-from-wishlist' %}" data-user-id="{{ user.id }}" data-plant-id="{{ plant.id }}" class="wishlisted" title="On the wishlist">&#128154;</span>
+                            {% elif plant.id in owned_plants %}
+                                <span title="Owned">&#x1F331;</span>
+                            {% else %}
+                                <span data-add-url="{% url 'add-to-wishlist' %}" data-remove-url="{% url 'remove-from-wishlist' %}" data-user-id="{{ user.id }}" data-plant-id="{{ plant.id }}" class="to-wishlist" title="Add to the wishlist">&#9825;</span><span data-add-url="{% url 'add-to-wishlist' %}" data-remove-url="{% url 'remove-from-wishlist' %}" data-user-id="{{ user.id }}" data-plant-id="{{ plant.id }}" class="hidden wishlisted">&#128154;</span>
+                            {% endif %}
+                        {% endif %}
+                    </p>
+{#                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">#}
+                </div>
+            </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

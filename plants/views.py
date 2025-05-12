@@ -121,6 +121,7 @@ class CatalogView(TemplateView):
             owned_ids = owned.values_list('plant_id', flat=True)
             list_of_owned_ids = list(owned_ids)
             context['owned_plants'] = list_of_owned_ids
+            context['can_diagnose'] = self.request.user.has_perm('plants.can_diagnose')
         return context
 
 class PlantDetailView(DetailView):
@@ -717,3 +718,61 @@ class RemoveFromOwnedView(LoginRequiredMixin,View):
             return JsonResponse({"success": True})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
+
+class WhatPlantView(PermissionRequiredMixin,View):
+    permission_required = ('plants.can_diagnose',)
+    def post(self, request):
+        if 'image' not in request.FILES:
+            return JsonResponse({'error': 'No image provided'}, status=400)
+
+        try:
+            # Get file from request
+            file = request.FILES.get('image')
+            prompt = f"Tell me what plant it is in the photo and how sure you are of that. Give me 3 options with level of certainty, full name of a plant and popular name.All the text should be raw, no markdown etc."
+
+            # Read image data
+            image_data = file.read()
+
+            # Encode to base64
+            base64_image = base64.b64encode(image_data).decode('utf-8')
+
+            # Get file format from filename
+            image_format = file.name.rsplit('.', 1)[1].lower() if '.' in file.name else 'jpeg'
+
+            # Get API key - preferably from environment variables
+            api_key = os.environ.get("XAI_API_KEY", "xai-KEY")
+
+            # Call Vision API
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            }
+
+            payload = {
+                "model": "grok-2-vision-1212",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/{image_format};base64,{base64_image}"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+
+            response = requests.post("https://api.x.ai/v1/chat/completions",headers=headers,json=payload)
+            if response.status_code == 200:
+                result = response.json()["choices"][0]["message"]["content"]
+                print(result)
+                return JsonResponse({ 'success': True, 'result': result})
+            else:
+                return JsonResponse({'success': False,'error': f"API Error: {response.status_code}",'details': response.text }, status=500)
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)

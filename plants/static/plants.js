@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if(removeFromOwned){
         removeFromOwned.forEach(button => {
             button.addEventListener('click', function () {
-                console.log('click')
+                if (!confirm("Do you want to remove this plant from your Owned list?\n\nThis will remove all the data connected with your plant.")) return;
                 const plantId = this.dataset.plantId;
                 const url = this.dataset.url;
                 const csrfToken = getCSRFToken()
@@ -266,6 +266,7 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("fileName").textContent = fileName;
         });
     }
+
     const fileInput = document.getElementById('id_image');
     const fileNameSpan = document.getElementById('file-name');
     if(fileInput && fileNameSpan)
@@ -273,5 +274,49 @@ document.addEventListener("DOMContentLoaded", function() {
        fileInput.addEventListener('change', function () {
           fileNameSpan.textContent = this.files.length > 0 ? this.files[0].name : 'No file chosen';
        });
+    }
+    const checkButton = document.querySelector('.check-button');
+    const checkModal = document.getElementById('checkModal');
+
+    if (checkButton && checkModal) {
+        checkButton.addEventListener('click', function () {
+            checkModal.style.display = 'block';
+        });
+    }
+    //showing chosen file name in catalog check plant  form box
+    const buttonPhotoAiForm=document.getElementById("photoInput")
+    if (buttonPhotoAiForm){
+        buttonPhotoAiForm.addEventListener("change", function () {
+            const fileName = this.files[0]?.name || "No file selected";
+            document.getElementById("photoName").textContent = fileName;
+        });
+    }
+    const photoInput = document.getElementById('photoInput');
+    const photoNameSpan = document.getElementById('photoName');
+    if(photoInput && photoNameSpan)
+    {
+       photoInput.addEventListener('change', function () {
+          photoNameSpan.textContent = this.files.length > 0 ? this.files[0].name : 'No file chosen';
+       });
+    }
+    //
+    const checkForm = document.getElementById('checkForm');
+    if (checkForm) {
+        checkForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const csrfToken = getCSRFToken();
+            const url = this.dataset.url;
+            if (!csrfToken) return;
+            sendForm(url,formData,data => {
+                if (data.result) alert("Result:\n"+ data.result);
+                else if (data.error) alert("Error:\n" + data.error);
+                else alert("Failed to get answer.");
+                const modal = document.getElementById('checkModal');
+                if (modal) modal.style.display = 'none';
+                checkForm.reset();
+                location.reload();
+            });
+        });
     }
 });
