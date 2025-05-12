@@ -21,12 +21,12 @@ from django.urls import path
 
 from plants import views
 from plants.views import (HomepageView, AddPlantView, CalendarView, CatalogView, PlantDetailView,
-                          DashboardView, RegisterView, AddEventView,  DiagnosePlantView,
+                          DashboardView, RegisterView, AddEventView, DiagnosePlantView,
                           OwnedPlantDetailView, UserProfileView, AddCommentView,
-                          ChangeWateringFrequencyView, RemoveFromWishlistView,AddToWishlistView,
+                          ChangeWateringFrequencyView, RemoveFromWishlistView, AddToWishlistView,
                           FinishWateringView, MoveWateringView, WishlistRemoveView, AddNoteView,
                           WishlistBoughtView, FinishEventView, CancelEventView, GeneratePDFView,
-                          AllEventsView)
+                          AllEventsView, RemoveFromOwnedView)
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -59,6 +59,7 @@ urlpatterns = [
     path('change-watering-frequency/',ChangeWateringFrequencyView.as_view(), name='change-watering-frequency'),
     path('add-comment/', AddCommentView.as_view(), name='add-comment'),
     path('generate-plant-pdf/<int:pk>/', views.generate_plant_pdf, name='generate-plant-pdf'),
+    path('remove-from-owned/', RemoveFromOwnedView.as_view(), name='remove-from-owned'),
 ]
 
 if settings.DEBUG:

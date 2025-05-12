@@ -164,6 +164,34 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     }
+    const removeFromOwned = document.querySelectorAll(".remove-from-owned-button")
+    if(removeFromOwned){
+        removeFromOwned.forEach(button => {
+            button.addEventListener('click', function () {
+                console.log('click')
+                const plantId = this.dataset.plantId;
+                const url = this.dataset.url;
+                const csrfToken = getCSRFToken()
+
+                if (!csrfToken) return;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({plant_id: plantId})
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) location.reload();
+                    else alert("Error: " + data.error);
+                })
+                .catch(err => alert("Network error"));
+            })
+        })
+    }
 
     // AI diagnose form
     const diagnoseForm = document.getElementById('diagnoseForm');

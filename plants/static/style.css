@@ -1032,7 +1032,6 @@ footer{
     display: flex;
     flex-direction: row;
     justify-content: start;
-
     width: calc(50% - 13.34px); /* 3 kolumny, odejmujemy 2/3 gapu */
     box-sizing: border-box;
 }
@@ -1054,6 +1053,20 @@ footer{
     margin-top:0;
     align-self: center;
     color: #3a430e !important;
+    width:80%
+}
+.remove-from-owned{
+    justify-self: end;
+    align-self: center;
+
+}
+.remove-from-owned-button{
+    color: #a1b588;
+    padding: 5px;
+    cursor: pointer;
+}
+.remove-from-owned-button:hover{
+    color: #3c4a2a;
 }
 /* ---------------------------------- */
 /*              wishlist              */

@@ -95,6 +95,7 @@
                                 {% endif %}
                             </div>
                             <div class="owned-plant-name"><a href="{% url 'my-plants' plant.plant.pk %}" class="header-style">{{ plant.plant.name }}</a></div>
+                            <div class="remove-from-owned"><p data-plant-id="{{ plant.plant.pk }}" data-url="{% url 'remove-from-owned' %}" class="remove-from-owned-button">&#x166D;</p></div>
                         </div>
                         {% empty %}
                         <p>No owned plants added.</p>

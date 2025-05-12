@@ -143,24 +143,21 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        tips = PlantTips.objects.all().order_by('?')[:2]
-        context['tips'] = tips
+        context['tips'] = PlantTips.objects.all().order_by('?')[:2]
         user = self.request.user
         owned_plants = OwnedPlants.objects.filter(owner=user).select_related('plant').order_by('plant_id__name')
         context['owned_plants'] = owned_plants
-        owned = []
-        for plant in owned_plants:
-            owned.append(plant.plant.id)
         last_waterings = []
-        for plantid in owned:
-            last = Watering.objects.filter(plant_id = int(plantid), user_id = self.request.user.pk).order_by('-next_watering').first()
+        for plant in owned_plants:
+            last = Watering.objects.filter(plant_id = int(plant.plant.pk), user_id = user.pk).order_by('-next_watering').first()
             last_waterings.append(last)
         sorted_waterings = sorted([w for w in last_waterings if w], key=lambda w: w.next_watering)
         context['waterings'] = sorted_waterings
         context['wishlist'] = WishList.objects.filter(owner=user).select_related('plant')
-        location = get_object_or_404(UserLocation, user=self.request.user)
-        weather_tip = generate_weather_tip(location.city)
-        context['weather_tip'] = weather_tip
+        location = get_object_or_404(UserLocation, user=user)
+        if location:
+            weather_tip = generate_weather_tip(location.city)
+            context['weather_tip'] = weather_tip
         return context
 
 class RegisterView(CreateView):
@@ -518,7 +515,6 @@ class WishlistBoughtView(LoginRequiredMixin,View):
             owner_id = request.user.pk
             wishlist_plant = get_object_or_404(WishList, plant_id=plant_id, owner_id=owner_id)
             record = OwnedPlants.objects.create_owned_plant_with_watering(owner=request.user,plant=plant)
-            # owned, created = OwnedPlants.objects.get_or_create(plant_id=plant_id, owner_id=owner_id)
             wishlist_plant.delete()
             return JsonResponse({"success": True})
 
@@ -709,3 +705,15 @@ def generate_plant_pdf(request, pk):
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{plant_name}_detail.pdf"'
     return response
+
+class RemoveFromOwnedView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            plant_id = int(data.get("plant_id"))
+            user_id = request.user.pk
+            owned = get_object_or_404(OwnedPlants,owner_id=user_id, plant_id=plant_id)
+            owned.delete()
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
