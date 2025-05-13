@@ -12,11 +12,11 @@ class PlantForm(forms.ModelForm):
         model = Plant
         fields = ['name', 'description', 'soil', 'light', 'watering_frequency', 'image']
 
-        def clean_image(self):
-            image = self.cleaned_data.get('image')
-            if image and not image.content_type.startswith('image/'):
-                raise forms.ValidationError("Only image files are allowed.")
-            return image
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+        if image and not image.content_type.startswith('image/'):
+            raise forms.ValidationError("Only image files are allowed.")
+        return image
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -24,11 +24,11 @@ class CustomUserCreationForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
-        def clean_email(self):
-            email = self.cleaned_data['email']
-            if User.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
-                raise forms.ValidationError("This email is already in use.")
-            return email
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
+            raise forms.ValidationError("This email is already in use.")
+        return email
 
 class EventForm(forms.ModelForm):
     class Meta:

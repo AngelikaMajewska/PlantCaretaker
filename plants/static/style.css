@@ -100,12 +100,7 @@ footer{
     height: fit-content;
 }
 .logout-button{
-    margin:auto;
-    padding: 10px 15px;
-
-    border-radius: 10px;
-    border: none;
-    font-size: 18px;
+    font-size: 18px !important;
     font-family: inherit;
 }
 .login a{
@@ -122,6 +117,7 @@ footer{
     color: #666e38;
     transition: background-color 0.2s ease;
     border: none !important;
+    font-family: inherit !important;
 }
 .all-buttons:hover{
     background-color: #cce365;
@@ -151,11 +147,15 @@ footer{
     padding: 10px 15px;
     border-radius: 10px;
     margin:auto;
+    font-family: inherit;
+    font-size: 16px;
 }
 .small-button{
     border: none;
     border-radius: 5px;
     padding: 5px 10px;
+    font-family: inherit;
+    font-size: 16px !important;
 }
 .scroll{
     overflow-y: scroll;
@@ -414,6 +414,20 @@ footer{
     width: 80%;
     margin:auto;
     align-content: center;
+}
+.check-button{
+    align-self: center;
+}
+#photoName{
+    font-size: 16px;
+}
+.image-upload-button{
+    display: inline-block;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    border:none;
+    font-weight: bold;
 }
 .plant-list{
     display: flex;
@@ -1321,6 +1335,26 @@ footer{
 .usernotes-list p{
     margin: 0 0 5px 20px;
 }
+.usernote{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-items: stretch;
+}
+.usernote .note{
+    width: 90%;
+}
+.usernote-header-date{
+
+}
+.delete-user-note{
+    padding: 0;
+    color: #a1b588;
+    cursor: pointer;
+}
+.delete-user-note:hover{
+    color: #3c4a2a;
+}
 .add-note-form{
     align-self: center;
 }
@@ -1419,7 +1453,7 @@ footer{
     font-size: 14px;
     text-align: center;
     text-decoration: none;
-    font-family: inherit;
+    font-family: inherit !important;
     padding: 5px 10px;
     border:none;
     font-weight: bold;

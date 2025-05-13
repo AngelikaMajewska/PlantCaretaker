@@ -26,7 +26,7 @@ from plants.views import (HomepageView, AddPlantView, CalendarView, CatalogView,
                           ChangeWateringFrequencyView, RemoveFromWishlistView, AddToWishlistView,
                           FinishWateringView, MoveWateringView, WishlistRemoveView, AddNoteView,
                           WishlistBoughtView, FinishEventView, CancelEventView, GeneratePDFView,
-                          AllEventsView, RemoveFromOwnedView,WhatPlantView)
+                          AllEventsView, RemoveFromOwnedView,WhatPlantView, DeleteUserNoteView)
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -61,6 +61,7 @@ urlpatterns = [
     path('add-comment/', AddCommentView.as_view(), name='add-comment'),
     path('generate-plant-pdf/<int:pk>/', views.generate_plant_pdf, name='generate-plant-pdf'),
     path('remove-from-owned/', RemoveFromOwnedView.as_view(), name='remove-from-owned'),
+    path('delete-note/', DeleteUserNoteView.as_view(), name='delete-note'),
 ]
 
 if settings.DEBUG:

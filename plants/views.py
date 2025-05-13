@@ -72,7 +72,7 @@ class AddPlantView(PermissionRequiredMixin, FormView):
         form.save()
         return super().form_valid(form)
 
-class CalendarView(TemplateView):
+class CalendarView(LoginRequiredMixin,TemplateView):
     template_name = 'plants/calendar.html'
 
     def get_context_data(self, **kwargs):
@@ -776,3 +776,17 @@ class WhatPlantView(PermissionRequiredMixin,View):
 
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+class DeleteUserNoteView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            note_id = int(data.get("note_id"))
+            plant_id = int(data.get("plant_id"))
+            user_id = request.user.pk
+            note = get_object_or_404(UserNotes,user_id=user_id, id=note_id)
+            if note.plant.pk == plant_id:
+                note.delete()
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})

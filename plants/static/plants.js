@@ -26,7 +26,10 @@ document.addEventListener("DOMContentLoaded", function() {
     setModalVisibility('wateringCloseModal', 'wateringModal', 'none');
 
 
-    const sendRequest= (url, data, callback) => {
+    const sendRequest= (url, data, callback, confirmation=null) => {
+        if (confirmation){
+            if (!confirm(confirmation)) return;
+        }
         fetch(url, {
             method: 'POST',
             headers: {
@@ -40,16 +43,15 @@ document.addEventListener("DOMContentLoaded", function() {
         .catch(err => alert("Network error"));
     };
 
-    const handleButtonClick = (selector, dataObject, url) => {
+    const handleButtonClick = (selector, dataObject, url,confirmation) => {
         document.querySelectorAll(selector).forEach(button => {
             button.addEventListener("click", function () {
                 const event_data = dataObject(this);
-                console.log(event_data)
                 if (!getCSRFToken()) return;
                 sendRequest(url, JSON.stringify(event_data), data => {
                     if (data.success) location.reload();
                     else alert("Error: " + data.error);
-                });
+                },confirmation);
                 console.log('after')
             });
         });
@@ -63,19 +65,21 @@ document.addEventListener("DOMContentLoaded", function() {
     // cancel-event on calendar
     const cancelEvent = document.querySelectorAll('.cancel-event')
     if(cancelEvent) {
-        handleButtonClick('.cancel-event', btn => ({event_id: btn.dataset.eventId}), "/cancel-event/");
+        const confirmation="Are you sure you want to cancel this event?"
+        handleButtonClick('.cancel-event', btn => ({event_id: btn.dataset.eventId}), "/cancel-event/",confirmation);
     }
     //removing from wishlist through dashboard
     const wishlistRemove = document.querySelectorAll('.wishlist-remove')
     if(wishlistRemove) {
-        handleButtonClick('.wishlist-remove', btn => ({ plant_id: btn.dataset.plantId, owner_id: btn.dataset.ownerId }), "/wishlist-remove/");
+        const confirmation="Are you sure you want to remove this plant from the wishlist?"
+        handleButtonClick('.wishlist-remove', btn => ({ plant_id: btn.dataset.plantId, owner_id: btn.dataset.ownerId }), "/wishlist-remove/",confirmation);
     }
     //marking as acquired through dashboard
     const wishlistBought = document.querySelectorAll('.wishlist-bought')
     if(wishlistBought) {
         handleButtonClick('.wishlist-bought', btn => ({ plant_id: btn.dataset.plantId }), "/wishlist-bought/");
     }
-    //adding to wishlist through catalh
+    //adding to wishlist through catalog
     const toWishlistIcons = document.querySelectorAll('.to-wishlist');
     if(toWishlistIcons) {
         handleButtonClick('.to-wishlist', btn => ({owner_id: btn.dataset.userId, plant_id: btn.dataset.plantId }), "/add-to-wishlist/");
@@ -144,10 +148,15 @@ document.addEventListener("DOMContentLoaded", function() {
         handleFormSubmit('note-form',form => new FormData(form))
     }
 
-    // watering frequency caenge form post
+    // watering frequency change form post
     const freqForm = document.getElementById("watering-frequency-form");
     if (freqForm) {
         handleFormSubmit('watering-frequency-form',form => new FormData(form))
+    }
+    const deleteUserNote = document.querySelectorAll('.delete-user-note')
+    if(deleteUserNote) {
+        const confirmation="Are you sure you want to delete this note?"
+        handleButtonClick('.delete-user-note', btn => ({note_id: btn.dataset.noteId, plant_id:btn.dataset.plantId}), "/delete-note/",confirmation);
     }
     // AI diagnose modal visibility
     const diagnoseBtn = document.querySelectorAll('.diagnose-btn')

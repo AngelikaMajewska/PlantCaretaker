@@ -6,19 +6,20 @@
     {% if can_diagnose %}
         <div class="diagnosis-box">
             <h3 class="section-header">Guess the plant</h3>
-            <p>If you can't find the plant that you are looking for in the catalog below, upload it here, and we'll identify it for you.</p>
-            <button class="check-button all-buttons big-button">Check</button>
-            <div style="display: block">
+            <p>If you can't find the name of a plant in the catalog below, upload its picture here, and AI will identify it for you.</p>
+            <button class="check-button all-buttons big-button">Upload</button>
+            <div style="display: block;align-self:center;">
                 <div id="checkModal" style="display:none;">
                     <form id="checkForm" enctype="multipart/form-data" data-url="{% url 'check-plant' %}">
                         {% csrf_token %}
                         <input type="file" name="image" id="photoInput" accept="image/*" required hidden>
-                        <label for="photoInput" class="file-upload-button all-buttons big-button">📷 Choose image</label>
+                        <label for="photoInput" class="image-upload-button all-buttons big-button">Choose image</label>
                         <span id="photoName">No file selected</span>
-                        <button class="all-buttons big-button" type="submit">Send for analysis</button>
+                        <button class="all-buttons big-button" type="submit">Identify</button>
                     </form>
                 </div>
             </div>
+            <h2 class="section-header">Catalog</h2>
         </div>
     {% endif %}
     <div class="plant-list">

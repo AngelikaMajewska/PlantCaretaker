@@ -38,8 +38,14 @@
                 <hr style="border:1px solid #cdcdcd; width: 100%">
                 <div class="usernotes-list scroll">
                         {% for note in user_notes %}
-                            <h4 class="header-style">{{note.date| date:"d.m.Y"}} </h4>
-                            <p>{{note.note}}</p>
+                            <div class="usernote">
+                                <div class="note">
+                                    <p class="usernote-header-date header-style">{{note.date| date:"d.m.Y"}} </p>
+                                    <p>{{note.note}}</p>
+                                    
+                                </div>
+                                <p class="delete-user-note" data-note-id="{{ note.id }}" data-plant-id="{{ plant.id }}">&#x166D;</p>
+                            </div>
                             <hr style="border:1px solid #dfdfdf; width: 90%">
                             {% empty %}
                             <p>No notes</p>

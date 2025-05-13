@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="watering",
             name="next_watering",
-            field=models.DateField(default=3),
+            field=models.DateField(default=None),
         ),
     ]
