@@ -3,7 +3,7 @@ import json
 import pytest
 from django.urls import reverse
 
-from plants.models import Plant, SoilType
+from plants.models import Plant, SoilType, WishList, Watering
 # from functions import ...
 
 # PlantDetailView
@@ -25,7 +25,7 @@ def test_plant_detail_does_not_exist(client):
 
 # AddPlantView
 @pytest.mark.django_db
-def test_add_plant(client,user_with_permission):
+def test_add_plant_with_permission(client,user_with_permission):
     client.force_login(user_with_permission)
     soil = SoilType.objects.create(
         name="Test Soil",
@@ -48,7 +48,7 @@ def test_add_plant(client,user_with_permission):
 
 # AddPlantView
 @pytest.mark.django_db
-def test_add_plant_fail(client,user_with_permission):
+def test_add_plant_missing_data_fail(client,user_with_permission):
     client.force_login(user_with_permission)
     data = {
         'name': 'Banana',
@@ -66,12 +66,12 @@ def test_add_plant_form_display(client,user_with_permission):
     assert response.context['form']
 
 # AddPlantView
-def test_add_plant_form_display_fail(client):
+def test_add_plant_form_display_not_logged_fail(client):
     response = client.get('/addplant/')
     assert response.status_code == 302
 
 # AddPlantView
-def test_add_plant_form_display_nologin_fail(client, user_logged):
+def test_add_plant_form_display_no_permission_fail(client, user_logged):
     client.force_login(user_logged)
     response = client.get('/addplant/')
     assert response.status_code == 403
@@ -86,7 +86,24 @@ def test_list_plants(three_plants,client):
     result_list = ['Test Plant 1','Test Plant 2','Test Plant 3']
     assert view_plants == result_list
 
-#CatalogView
+#Icons of Wishlist for Catalog
+@pytest.mark.django_db
+def test_icons_visible_logged(client, user_logged, plant):
+    client.force_login(user_logged)
+    response = client.get('/catalog/')
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert 'to-wishlist' in html or 'wishlisted' in html or 'owned-catalog-icon' in html
+
+#Icons of Wishlist for Catalog
+@pytest.mark.django_db
+def test_icons_visible_not_logged_fail(client, plant):
+    response = client.get('/catalog/')
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert 'to-wishlist' not in html and 'wishlisted' not in html and 'owned-catalog-icon' not in html
+
+#WhatPlantView for Catalog
 @pytest.mark.django_db
 def test_ai_form_logged(client, user_logged):
     client.force_login(user_logged)
@@ -95,80 +112,88 @@ def test_ai_form_logged(client, user_logged):
     html = response.content.decode()
     assert 'diagnosis-box' not in html
 
-#CatalogView
+#WhatPlantView for Catalog
 @pytest.mark.django_db
-def test_ai_form_not_logged(client, user_can_diagnose):
+def test_ai_form_not_logged(client):
+    response = client.get('/catalog/')
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert 'diagnosis-box' not in html
+
+#WhatPlantView for Catalog
+@pytest.mark.django_db
+def test_ai_form_permission(client, user_can_diagnose):
     client.force_login(user_can_diagnose)
     response = client.get('/catalog/')
     assert response.status_code == 200
     html = response.content.decode()
     assert 'diagnosis-box' in html
 
-#Calendar
+#AddToWishlistView for Catalog
 @pytest.mark.django_db
-def test_calendar_fail(client):
-    response = client.get('/calendar/')
-    assert response.status_code == 302
-
-#Calendar
-@pytest.mark.django_db
-def test_calendar_logged(client,user_logged):
+def test_add_to_wishlist(client,plant,user_logged):
     client.force_login(user_logged)
-    response = client.get('/calendar/')
-    assert response.status_code == 200
-
-#AddEventView
-@pytest.mark.django_db
-def test_add_event(client,user_logged,event):
-    client.force_login(user_logged)
-    event = {
-        'name': event.name,
-        'description': event.description,
-        'date': event.date,
-        'plant': event.plant.pk,
+    to_wishlist = {
+        'plant_id': plant.pk,
+        'owner_id': user_logged.pk,
     }
-    response = client.post('/add-event/', event)
+    response = client.post('/add-to-wishlist/', data=json.dumps(to_wishlist), content_type='application/json')
     assert response.status_code == 200
     assert response.json()['success'] is True
 
-#AddEventView
+#AddToWishlistView for Catalog
 @pytest.mark.django_db
-def test_add_event_missing_data_fail(client,user_logged,event):
+def test_add_to_wishlist_double_data_fail(client,plant,user_logged):
     client.force_login(user_logged)
-    event = {
-        'description': event.description,
-        'date': event.date.strftime('%Y-%m-%d'),
-        'plant': event.plant.pk,
+    to_wishlist = {
+        'plant_id': plant.pk,
+        'owner_id': user_logged.pk,
     }
-    response = client.post('/add-event/', event)
+    first_response = client.post('/add-to-wishlist/', data=json.dumps(to_wishlist), content_type='application/json')
+    second_response = client.post('/add-to-wishlist/', data=json.dumps(to_wishlist), content_type='application/json')
+    assert second_response.status_code == 200
+    assert second_response.json()['success'] is False
+    assert second_response.json()['error'] == "Plant already in wishlist."
+
+#AddToWishlistView for Catalog
+@pytest.mark.django_db
+def test_add_to_wishlist_not_logged_fail(client):
+    response = client.get('/add-to-wishlist/')
+    assert response.status_code == 302
+
+#RemoveFromWishlistView for Catalog
+@pytest.mark.django_db
+def test_remove_from_wishlist(client,wishlist,user_logged):
+    client.force_login(user_logged)
+    plant = wishlist.plant_id
+    owner = wishlist.owner_id
+    from_wishlist = {
+        'plant_id': plant,
+        'owner_id': owner,
+    }
+    response = client.post('/remove-from-wishlist/', data=json.dumps(from_wishlist), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is True
+
+#RemoveFromWishlistView for Catalog
+@pytest.mark.django_db
+def test_remove_from_wishlist_doesnt_exist_fail(client,wishlist,user_logged):
+    client.force_login(user_logged)
+    owner_id = wishlist.owner_id
+    from_wishlist = {
+        'plant_id': 125676,
+        'owner_id': owner_id,
+    }
+    response = client.post('/remove-from-wishlist/', data=json.dumps(from_wishlist), content_type='application/json')
     assert response.status_code == 200
     assert response.json()['success'] is False
+    assert response.json()['error'] == "No WishList matches the given query."
 
-#AddEventView
+#RemoveFromWishlistView for Catalog
 @pytest.mark.django_db
-def test_add_event_fail(client,event):
-    event = {
-        'name': event.name,
-        'description': event.description,
-        'date': event.date.strftime('%Y-%m-%d'),
-        'plant': event.plant.pk,
-    }
-    response = client.post('/add-event/', event)
+def test_remove_from_wishlist_not_logged_fail(client):
+    response = client.get('/remove-from-wishlist/')
     assert response.status_code == 302
-    assert '/login' in response.url or '/accounts/login' in response.url
-
-#FinishEventView
-@pytest.mark.django_db
-def test_finish_event_logged(client,user_logged,event):
-    client.force_login(user_logged)
-    event.user = user_logged
-    data={
-        'event_id': event.pk,
-    }
-    response = client.post('/finish-event/', data=json.dumps(data),content_type='application/json')
-    assert response.status_code == 200
-    assert response.json()['success'] is True
-
 
 #PlantDetailView
 @pytest.mark.django_db
@@ -228,7 +253,7 @@ def test_add_comment(client,plant,user_logged):
 
 #PlantDetailView
 @pytest.mark.django_db
-def test_add_comment_fail(client,plant,user_logged):
+def test_add_comment_empty_fail(client,plant,user_logged):
     client.force_login(user_logged)
     data = {
         'plant_id': plant.pk,
@@ -240,11 +265,155 @@ def test_add_comment_fail(client,plant,user_logged):
 
 #PlantDetailView
 @pytest.mark.django_db
-def test_add_comment_methon_get_fail(client,plant,user_logged):
+def test_add_comment_method_get_fail(client,plant,user_logged):
     client.force_login(user_logged)
     response = client.get('/add-comment/')
     assert response.status_code == 200
     assert response.json()['success'] is False
     assert response.json()['error'] == "Invalid request method."
+
+#Calendar
+@pytest.mark.django_db
+def test_calendar_not_logged_fail(client):
+    response = client.get('/calendar/')
+    assert response.status_code == 302
+
+#Calendar
+@pytest.mark.django_db
+def test_calendar_logged(client,user_logged):
+    client.force_login(user_logged)
+    response = client.get('/calendar/')
+    assert response.status_code == 200
+
+#AddEventView
+@pytest.mark.django_db
+def test_add_event(client,user_logged,event):
+    client.force_login(user_logged)
+    event = {
+        'name': event.name,
+        'description': event.description,
+        'date': event.date,
+        'plant': event.plant.pk,
+    }
+    response = client.post('/add-event/', event)
+    assert response.status_code == 200
+    assert response.json()['success'] is True
+
+#AddEventView
+@pytest.mark.django_db
+def test_add_event_missing_data_fail(client,user_logged,event):
+    client.force_login(user_logged)
+    event = {
+        'description': event.description,
+        'date': event.date.strftime('%Y-%m-%d'),
+        'plant': event.plant.pk,
+    }
+    response = client.post('/add-event/', event)
+    assert response.status_code == 200
+    assert response.json()['success'] is False
+
+#AddEventView
+@pytest.mark.django_db
+def test_add_event_not_logged_fail(client,event):
+    event = {
+        'name': event.name,
+        'description': event.description,
+        'date': event.date.strftime('%Y-%m-%d'),
+        'plant': event.plant.pk,
+    }
+    response = client.post('/add-event/', event)
+    assert response.status_code == 302
+    assert '/login' in response.url or '/accounts/login' in response.url
+
+#FinishEventView
+@pytest.mark.django_db
+def test_finish_event_logged(client,user_logged,event):
+    client.force_login(user_logged)
+    event.user = user_logged
+    data={
+        'event_id': event.pk,
+    }
+    response = client.post('/finish-event/', data=json.dumps(data),content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is True
+
+#FinishEventView
+@pytest.mark.django_db
+def test_finish_event_wrong_id_fail(client,user_logged,event):
+    client.force_login(user_logged)
+    event.user = user_logged
+    data={
+        'event_id': 14534,
+    }
+    response = client.post('/finish-event/', data=json.dumps(data),content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is False
+
+#FinishEventView
+@pytest.mark.django_db
+def test_finish_event_not_logged(client,event):
+    data={
+        'event_id': event.pk,
+    }
+    response = client.post('/finish-event/', data=json.dumps(data),content_type='application/json')
+    assert response.status_code == 302
+
+#CancelEventView
+@pytest.mark.django_db
+def test_cancel_event_logged(client,user_logged,event):
+    client.force_login(user_logged)
+    event.user = user_logged
+    data={
+        'event_id': event.pk,
+    }
+    response = client.post('/cancel-event/', data=json.dumps(data),content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is True
+
+#CancelEventView
+@pytest.mark.django_db
+def test_cancel_event_wrong_id_fail(client,user_logged,event):
+    client.force_login(user_logged)
+    event.user = user_logged
+    data={
+        'event_id': 14534,
+    }
+    response = client.post('/cancel-event/', data=json.dumps(data),content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is False
+
+#CancelEventView
+@pytest.mark.django_db
+def test_cancel_event_not_logged(client,event):
+    data={
+        'event_id': event.pk,
+    }
+    response = client.post('/cancel-event/', data=json.dumps(data),content_type='application/json')
+    assert response.status_code == 302
+
+# DashboardView
+@pytest.mark.django_db
+def test_dashboard_not_logged_fail(client):
+    response = client.get('/dashboard/')
+    assert response.status_code == 302
+
+#DashboardView
+@pytest.mark.django_db
+def test_dashboard_logged(client,user_logged,owned_plants,multiple_wishlist):
+    client.force_login(user_logged)
+    response = client.get('/dashboard/')
+    assert response.status_code == 200
+    html = response.content.decode()
+    for current_plant in owned_plants:
+        assert str(current_plant.plant.name) in html
+        assert Watering.objects.filter(user=user_logged, plant=current_plant.plant).exists()
+    for plant in multiple_wishlist:
+        assert WishList.objects.filter(owner=user_logged, plant_id=plant.plant.pk).exists()
+
+
+
+
+
+
 
 #AllEventsView

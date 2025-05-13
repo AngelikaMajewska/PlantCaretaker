@@ -39,7 +39,7 @@
                             {% if plant.id in wishlist %}
                                 <span data-add-url="{% url 'add-to-wishlist' %}" data-remove-url="{% url 'remove-from-wishlist' %}" data-user-id="{{ user.id }}" data-plant-id="{{ plant.id }}" class="hidden to-wishlist" >&#9825;</span><span data-add-url="{% url 'add-to-wishlist' %}" data-remove-url="{% url 'remove-from-wishlist' %}" data-user-id="{{ user.id }}" data-plant-id="{{ plant.id }}" class="wishlisted" title="On the wishlist">&#128154;</span>
                             {% elif plant.id in owned_plants %}
-                                <span title="Owned">&#x1F331;</span>
+                                <span class="owned-catalog-icon" title="Owned">&#x1F331;</span>
                             {% else %}
                                 <span data-add-url="{% url 'add-to-wishlist' %}" data-remove-url="{% url 'remove-from-wishlist' %}" data-user-id="{{ user.id }}" data-plant-id="{{ plant.id }}" class="to-wishlist" title="Add to the wishlist">&#9825;</span><span data-add-url="{% url 'add-to-wishlist' %}" data-remove-url="{% url 'remove-from-wishlist' %}" data-user-id="{{ user.id }}" data-plant-id="{{ plant.id }}" class="hidden wishlisted">&#128154;</span>
                             {% endif %}

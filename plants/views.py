@@ -27,7 +27,6 @@ api_key = settings.WEATHER_API_KEY
 
 def generate_weather_tip(city):
     API_KEY = api_key
-    print(city)
     CITY = city
     url = f'https://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=metric'
 
@@ -167,6 +166,37 @@ class CatalogView(TemplateView):
             context['owned_plants'] = list_of_owned_ids
             context['can_diagnose'] = self.request.user.has_perm('plants.can_diagnose')
         return context
+class AddToWishlistView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            plant_id = int(data.get("plant_id"))
+            owner_id = self.request.user.pk
+            if WishList.objects.filter(owner_id=owner_id, plant_id=plant_id).exists():
+                return JsonResponse({"success": False, "error": "Plant already in wishlist."})
+            if Plant.objects.filter(pk=plant_id).exists():
+                WishList.objects.create(plant_id=plant_id, owner_id=owner_id)
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
+class RemoveFromWishlistView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            plant_id = int(data.get("plant_id"))
+            owner_id = request.user.pk
+            record = get_object_or_404(WishList, owner_id=owner_id, plant_id=plant_id)
+            record.delete()
+            return JsonResponse({"success": True})
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
 class WhatPlantView(PermissionRequiredMixin,View):
     permission_required = ('plants.can_diagnose',)
     def post(self, request):
@@ -299,19 +329,70 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         sorted_waterings = sorted([w for w in last_waterings if w], key=lambda w: w.next_watering)
         context['waterings'] = sorted_waterings
         context['wishlist'] = WishList.objects.filter(owner=user).select_related('plant')
-        location = get_object_or_404(UserLocation, user=user)
+        location = UserLocation.objects.get(user=user)
         if location:
             weather_tip = generate_weather_tip(location.city)
             context['weather_tip'] = weather_tip
         return context
+class MoveWateringView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            watering_id = int(data.get("watering_id"))
+            plant_id = int(data.get("plant_id"))
+            days = int(data.get("days"))
+            if days == 1 or days == -1:
+                days = int(data.get("days"))
+                watering = get_object_or_404(Watering,pk=watering_id)
+                if (watering.user == request.user) and (watering.plant.id == int(plant_id)):
+                    watering.next_watering += timedelta(days=days)
+                    watering.save()
+                    return JsonResponse({"success": True})
+                return JsonResponse({"success": False, "error": "Invalid data"})
+        except Watering.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Watering not found on the list."})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
 
-class RegisterView(CreateView):
-    template_name = 'plants/register.html'
-    form_class = CustomUserCreationForm
-    success_url = reverse_lazy('login')
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
+class FinishWateringView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            watering_id = int(data.get("watering_id"))
+            fertilizer = data.get("fertilizer")
+            fertilizer = True if fertilizer == "True" else False
 
+            watering = get_object_or_404(Watering, pk=watering_id)
+            user_id = request.user.pk
+            plant_id = watering.plant.pk
 
+            user_plant = get_object_or_404(OwnedPlants, owner=request.user, plant=plant_id)
+            user_watering_frequency = user_plant.owner_watering_frequency
+            if user_watering_frequency:
+                freq = user_watering_frequency
+            else:
+                freq = Plant.objects.get(pk = plant_id).watering_frequency
+            new_watering = Watering.objects.create(
+                user_id=user_id,
+                plant_id=plant_id,
+                date=date.today(),
+                fertiliser=fertilizer,
+                next_watering=(date.today() + timedelta(days=freq))
+            )
 
+            return JsonResponse({"success": True})
+
+        except Watering.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Watering not found on the list."})
+        except OwnedPlants.DoesNotExist:
+            return JsonResponse({"success": False, "error": "User does not own this plant."})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
 class GeneratePDFView(LoginRequiredMixin,View):
     def get(self, request, *args, **kwargs):
         this_month = datetime.today().month
@@ -376,7 +457,52 @@ class GeneratePDFView(LoginRequiredMixin,View):
         response = HttpResponse(pdf_file, content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="month_planner.pdf"'
         return response
+class WishlistRemoveView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            plant_id = int(data.get("plant_id"))
+            owner_id = request.user.pk
+            wishlist_plant = get_object_or_404(WishList, plant_id=plant_id, owner_id=owner_id)
+            wishlist_plant.delete()
+            return JsonResponse({"success": True})
+        except WishList.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Plant not found on wishlist"})
+        except Exception:
+            return JsonResponse({"success": False, "error": "Some error occurred"})
 
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Bad request"})
+class WishlistBoughtView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            plant_id = int(data.get("plant_id"))
+            plant= get_object_or_404(Plant, pk=plant_id)
+            owner_id = request.user.pk
+            wishlist_plant = get_object_or_404(WishList, plant_id=plant_id, owner_id=owner_id)
+            record = OwnedPlants.objects.create_owned_plant_with_watering(owner=request.user,plant=plant)
+            wishlist_plant.delete()
+            return JsonResponse({"success": True})
+
+        except WishList.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Plant not found on wishlist."})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
+class RemoveFromOwnedView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            plant_id = int(data.get("plant_id"))
+            user_id = request.user.pk
+            owned = get_object_or_404(OwnedPlants,owner_id=user_id, plant_id=plant_id)
+            owned.delete()
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
 
 
 def generate_plotly_chart(labels, values):
@@ -473,7 +599,6 @@ def get_watering_differences(plant_id):
         fig = go.Figure(data=[trace], layout=layout)
         chart_html = opy.plot(fig, auto_open=False, output_type='div')
         return chart_html
-
 class OwnedPlantDetailView(LoginRequiredMixin,TemplateView):
     template_name = 'plants/owned_plants.html'
     def get_context_data(self, **kwargs):
@@ -572,7 +697,6 @@ class DiagnosePlantView(PermissionRequiredMixin,View):
 
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
 class AddNoteView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
         try:
@@ -591,100 +715,47 @@ class AddNoteView(LoginRequiredMixin,View):
 
     def get(self, request, *args, **kwargs):
         return JsonResponse({"success": False, "error": "Invalid request method"})
-class WishlistRemoveView(LoginRequiredMixin,View):
+class ChangeWateringFrequencyView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         try:
-            data = json.loads(request.body)
-            plant_id = int(data.get("plant_id"))
-            owner_id = request.user.pk
-            wishlist_plant = get_object_or_404(WishList, plant_id=plant_id, owner_id=owner_id)
-            wishlist_plant.delete()
-            return JsonResponse({"success": True})
-        except WishList.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Plant not found on wishlist"})
-        except Exception:
-            return JsonResponse({"success": False, "error": "Some error occurred"})
+            plant_id = int(request.POST.get("plant_id"))
+            frequency = int(request.POST.get("frequency"))
+            plant = get_object_or_404(Plant, pk=plant_id)
 
-    def get(self, request, *args, **kwargs):
-        return JsonResponse({"success": False, "error": "Bad request"})
-class WishlistBoughtView(LoginRequiredMixin,View):
-    def post(self, request, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-            plant_id = int(data.get("plant_id"))
-            plant= get_object_or_404(Plant, pk=plant_id)
-            owner_id = request.user.pk
-            wishlist_plant = get_object_or_404(WishList, plant_id=plant_id, owner_id=owner_id)
-            record = OwnedPlants.objects.create_owned_plant_with_watering(owner=request.user,plant=plant)
-            wishlist_plant.delete()
-            return JsonResponse({"success": True})
-
-        except WishList.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Plant not found on wishlist."})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    def get(self, request, *args, **kwargs):
-        return JsonResponse({"success": False, "error": "Invalid request method."})
-class MoveWateringView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-            watering_id = int(data.get("watering_id"))
-            plant_id = int(data.get("plant_id"))
-            days = int(data.get("days"))
-            if days == 1 or days == -1:
-                days = int(data.get("days"))
-                watering = get_object_or_404(Watering,pk=watering_id)
-                if (watering.user == request.user) and (watering.plant.id == int(plant_id)):
-                    watering.next_watering += timedelta(days=days)
-                    watering.save()
-                    return JsonResponse({"success": True})
-                return JsonResponse({"success": False, "error": "Invalid data"})
-        except Watering.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Watering not found on the list."})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    def get(self, request, *args, **kwargs):
-        return JsonResponse({"success": False, "error": "Invalid request method."})
-class FinishWateringView(LoginRequiredMixin,View):
-    def post(self, request, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-            watering_id = int(data.get("watering_id"))
-            fertilizer = data.get("fertilizer")
-            fertilizer = True if fertilizer == "True" else False
-
-            watering = get_object_or_404(Watering, pk=watering_id)
-            user_id = request.user.pk
-            plant_id = watering.plant.pk
-
-            user_plant = get_object_or_404(OwnedPlants, owner=request.user, plant=plant_id)
-            user_watering_frequency = user_plant.owner_watering_frequency
-            if user_watering_frequency:
-                freq = user_watering_frequency
-            else:
-                freq = Plant.objects.get(pk = plant_id).watering_frequency
-            new_watering = Watering.objects.create(
-                user_id=user_id,
-                plant_id=plant_id,
-                date=date.today(),
-                fertiliser=fertilizer,
-                next_watering=(date.today() + timedelta(days=freq))
+            OwnedPlants.objects.watering_frequency_change(
+                owner=request.user,
+                plant=plant,
+                new_watering_frequency=frequency
             )
 
             return JsonResponse({"success": True})
-
-        except Watering.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Watering not found on the list."})
-        except OwnedPlants.DoesNotExist:
-            return JsonResponse({"success": False, "error": "User does not own this plant."})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
 
     def get(self, request, *args, **kwargs):
         return JsonResponse({"success": False, "error": "Invalid request method."})
+class DeleteUserNoteView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            note_id = int(data.get("note_id"))
+            plant_id = int(data.get("plant_id"))
+            user_id = request.user.pk
+            note = get_object_or_404(UserNotes,user_id=user_id, id=note_id)
+            if note.plant.pk == plant_id:
+                note.delete()
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+
+
+
+
+
+
+
+
 class UserProfileView(LoginRequiredMixin, View):
     template_name = 'plants/user_profile.html'
 
@@ -711,82 +782,16 @@ class UserProfileView(LoginRequiredMixin, View):
             'user_form': user_form,
             'location_form': location_form
         })
-class AddToWishlistView(LoginRequiredMixin,View):
-    def post(self, request, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-            plant_id = int(data.get("plant_id"))
-            owner_id = self.request.user.pk
-            if WishList.objects.filter(owner_id=owner_id, plant_id=plant_id).exists():
-                return JsonResponse({"success": False, "error": "Plant already in wishlist."})
-            if Plant.objects.filter(pk=plant_id).exists():
-                WishList.objects.create(plant_id=plant_id, owner_id=owner_id)
-            return JsonResponse({"success": True})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    def get(self, request, *args, **kwargs):
-        return JsonResponse({"success": False, "error": "Invalid request method."})
-class RemoveFromWishlistView(LoginRequiredMixin,View):
-    def post(self, request, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-            plant_id = int(data.get("plant_id"))
-            owner_id = request.user.pk
-            record = get_object_or_404(WishList, owner_id=owner_id, plant_id=plant_id)
-            record.delete()
-            return JsonResponse({"success": True})
-
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    def get(self, request, *args, **kwargs):
-        return JsonResponse({"success": False, "error": "Invalid request method."})
-class ChangeWateringFrequencyView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        try:
-            plant_id = int(request.POST.get("plant_id"))
-            frequency = int(request.POST.get("frequency"))
-            plant = get_object_or_404(Plant, pk=plant_id)
-
-            OwnedPlants.objects.watering_frequency_change(
-                owner=request.user,
-                plant=plant,
-                new_watering_frequency=frequency
-            )
-
-            return JsonResponse({"success": True})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    def get(self, request, *args, **kwargs):
-        return JsonResponse({"success": False, "error": "Invalid request method."})
-
-
-class RemoveFromOwnedView(LoginRequiredMixin,View):
-    def post(self, request, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-            plant_id = int(data.get("plant_id"))
-            user_id = request.user.pk
-            owned = get_object_or_404(OwnedPlants,owner_id=user_id, plant_id=plant_id)
-            owned.delete()
-            return JsonResponse({"success": True})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
 
 
 
-class DeleteUserNoteView(LoginRequiredMixin,View):
-    def post(self, request, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-            note_id = int(data.get("note_id"))
-            plant_id = int(data.get("plant_id"))
-            user_id = request.user.pk
-            note = get_object_or_404(UserNotes,user_id=user_id, id=note_id)
-            if note.plant.pk == plant_id:
-                note.delete()
-            return JsonResponse({"success": True})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
+
+
+
+
+
+
+class RegisterView(CreateView):
+    template_name = 'plants/register.html'
+    form_class = CustomUserCreationForm
+    success_url = reverse_lazy('login')
