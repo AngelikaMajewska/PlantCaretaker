@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 import pytest
 from django.contrib.auth.models import User, Permission
@@ -86,6 +86,22 @@ def user_logged(db):
     user.save()
     return user
 
+# @pytest.fixture
+# def event(user_logged):
+#     ing = SoilIngredient.objects.create(name="Peat", description="Retains moisture")
+#     soil = SoilType.objects.create(name="Soil C", description="Type C")
+#     soil.ingredients.set([ing])
+#     plant = Plant.objects.create(
+#         name='Test Plant 3',
+#         description='Test description 3',
+#         soil=soil,
+#         light=3,
+#         watering_frequency=6
+#     )
+#
+#     event = Event.objects.create(name='Test Event', description='Test description',plant=plant,user=user_logged,date=datetime.now().today())
+#     return event
+
 @pytest.fixture
 def event(user_logged):
     ing = SoilIngredient.objects.create(name="Peat", description="Retains moisture")
@@ -98,5 +114,13 @@ def event(user_logged):
         light=3,
         watering_frequency=6
     )
-    event = Event.objects.create(name='Test Event', description='Test description',plant=plant,user=user_logged,date=datetime.now().today())
+
+    event_date = datetime.date.today()
+    event = Event.objects.create(
+        name='Test Event',
+        description='Test description',
+        plant=plant,
+        user=user_logged,
+        date=event_date
+    )
     return event

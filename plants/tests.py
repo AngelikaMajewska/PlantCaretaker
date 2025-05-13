@@ -1,18 +1,4 @@
-# import pytest
-#
-# from exercises_app.views import ProductView
-#
-# @pytest.mark.django_db
-# def test_product_detail(product, client):
-#     response = client.get(f'/product/{product.pk}/')
-#     assert response.status_code == 200
-#     name = response.context['name']
-#     description = response.context['description']
-#     price = response.context['price']
-#     assert name == product.name
-#     assert description == product.description
-#     assert price == product.price
-
+import json
 
 import pytest
 from django.urls import reverse
@@ -102,7 +88,7 @@ def test_list_plants(three_plants,client):
 
 #CatalogView
 @pytest.mark.django_db
-def test_ai_logged(client, user_logged):
+def test_ai_form_logged(client, user_logged):
     client.force_login(user_logged)
     response = client.get('/catalog/')
     assert response.status_code == 200
@@ -111,7 +97,7 @@ def test_ai_logged(client, user_logged):
 
 #CatalogView
 @pytest.mark.django_db
-def test_ai_not_logged(client, user_can_diagnose):
+def test_ai_form_not_logged(client, user_can_diagnose):
     client.force_login(user_can_diagnose)
     response = client.get('/catalog/')
     assert response.status_code == 200
@@ -138,7 +124,7 @@ def test_add_event(client,user_logged,event):
     event = {
         'name': event.name,
         'description': event.description,
-        'date': event.date.strftime('%Y-%m-%d'),
+        'date': event.date,
         'plant': event.plant.pk,
     }
     response = client.post('/add-event/', event)
@@ -171,6 +157,19 @@ def test_add_event_fail(client,event):
     assert response.status_code == 302
     assert '/login' in response.url or '/accounts/login' in response.url
 
+#FinishEventView
+@pytest.mark.django_db
+def test_finish_event_logged(client,user_logged,event):
+    client.force_login(user_logged)
+    event.user = user_logged
+    data={
+        'event_id': event.pk,
+    }
+    response = client.post('/finish-event/', data=json.dumps(data),content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is True
+
+
 #PlantDetailView
 @pytest.mark.django_db
 def test_pdf_generate(client, plant):
@@ -179,6 +178,7 @@ def test_pdf_generate(client, plant):
     html = response.content.decode()
     assert 'generate-plant-pdf' in html
 
+#PlantDetailView
 @pytest.mark.django_db
 def test_generate_plant_pdf(client,plant):
     url = reverse('generate-plant-pdf', args=[plant.pk])
@@ -189,19 +189,62 @@ def test_generate_plant_pdf(client,plant):
     assert f'{plant.name}_detail.pdf' in response['Content-Disposition']
     assert len(response.content) > 100
 
+#PlantDetailView
 @pytest.mark.django_db
-def test_add_comment_logged(client, plant,user_logged):
+def test_add_comment_form_logged(client, plant,user_logged):
     client.force_login(user_logged)
     response = client.get(f'/plants/{plant.pk}/')
     assert response.status_code == 200
     html = response.content.decode()
     assert 'add-comment-form' in html
 
+#PlantDetailView
 @pytest.mark.django_db
-def test_add_comment_not_logged(client, plant):
+def test_add_comment_form_not_logged(client, plant):
     response = client.get(f'/plants/{plant.pk}/')
     assert response.status_code == 200
     html = response.content.decode()
     assert 'add-comment-form' not in html
+
+#PlantDetailView
+@pytest.mark.django_db
+def test_add_comment_form_not_logged(client, plant):
+    response = client.get(f'/plants/{plant.pk}/')
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert 'add-comment-form' not in html
+
+#PlantDetailView
+@pytest.mark.django_db
+def test_add_comment(client,plant,user_logged):
+    client.force_login(user_logged)
+    data={
+        'plant_id': plant.pk,
+        'comment': 'test comment',
+    }
+    response = client.post( '/add-comment/', data=json.dumps(data), content_type='application/json' )
+    assert response.status_code == 200
+    assert response.json()['success'] is True
+
+#PlantDetailView
+@pytest.mark.django_db
+def test_add_comment_fail(client,plant,user_logged):
+    client.force_login(user_logged)
+    data = {
+        'plant_id': plant.pk,
+    }
+    response = client.post('/add-comment/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is False
+    assert response.json()['error'] == "Comment cannot be empty."
+
+#PlantDetailView
+@pytest.mark.django_db
+def test_add_comment_methon_get_fail(client,plant,user_logged):
+    client.force_login(user_logged)
+    response = client.get('/add-comment/')
+    assert response.status_code == 200
+    assert response.json()['success'] is False
+    assert response.json()['error'] == "Invalid request method."
 
 #AllEventsView

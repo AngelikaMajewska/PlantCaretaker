@@ -71,7 +71,6 @@ class AddPlantView(PermissionRequiredMixin, FormView):
             return HttpResponseForbidden("You do not have permission.")
         form.save()
         return super().form_valid(form)
-
 class CalendarView(LoginRequiredMixin,TemplateView):
     template_name = 'plants/calendar.html'
 
@@ -83,7 +82,53 @@ class CalendarView(LoginRequiredMixin,TemplateView):
             context['events'] = Event.objects.filter(user=user, is_finished=False).order_by('date')
             context['finished_events'] = Event.objects.filter(user=user, is_finished=True).order_by('-date')
             return context
+class AddEventView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        form = EventForm(request.POST)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.user = request.user
+            event.save()
+            return JsonResponse({'success': True})
+        else:
+            errors = form.errors.get_json_data()
+            error_list = [v[0]['message'] for k, v in errors.items()]
+            return JsonResponse({'success': False, 'errors': error_list})
+class FinishEventView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            event_id = int(data.get("event_id"))
+            event = get_object_or_404(Event, pk=event_id)
+            if event.user == request.user:
+                event.is_finished = True
+                event.date = datetime.today()
+                event.save()
+                return JsonResponse({"success": True})
+            return JsonResponse({"success": False, "error": "Event doesn't exist"})
+        except Event.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Event doesn't exist"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
 
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Bad request"})
+class CancelEventView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = json.loads(request.body)
+            event_id = int(data.get("event_id"))
+            event = get_object_or_404(Event, pk=event_id)
+            if event.user == request.user:
+                event.delete()
+            return JsonResponse({"success": True})
+        except Event.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Event doesn't exist"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Bad request"})
 # data for calendar
 class AllEventsView(View):
     def get(self, request, *args, **kwargs):
@@ -105,7 +150,6 @@ class AllEventsView(View):
             })
 
         return JsonResponse(event_list, safe=False)
-
 class CatalogView(TemplateView):
     template_name = 'plants/catalog.html'
 
@@ -123,7 +167,63 @@ class CatalogView(TemplateView):
             context['owned_plants'] = list_of_owned_ids
             context['can_diagnose'] = self.request.user.has_perm('plants.can_diagnose')
         return context
+class WhatPlantView(PermissionRequiredMixin,View):
+    permission_required = ('plants.can_diagnose',)
+    def post(self, request):
+        if 'image' not in request.FILES:
+            return JsonResponse({'error': 'No image provided'}, status=400)
 
+        try:
+            # Get file from request
+            file = request.FILES.get('image')
+            prompt = f"Tell me what plant it is in the photo and how sure you are of that. Give me 3 options with level of certainty, full name of a plant and popular name.All the text should be raw, no markdown etc."
+
+            # Read image data
+            image_data = file.read()
+
+            # Encode to base64
+            base64_image = base64.b64encode(image_data).decode('utf-8')
+
+            # Get file format from filename
+            image_format = file.name.rsplit('.', 1)[1].lower() if '.' in file.name else 'jpeg'
+
+            # Get API key - preferably from environment variables
+            api_key = os.environ.get("XAI_API_KEY", "xai-KEY")
+
+            # Call Vision API
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            }
+
+            payload = {
+                "model": "grok-2-vision-1212",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/{image_format};base64,{base64_image}"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+
+            response = requests.post("https://api.x.ai/v1/chat/completions",headers=headers,json=payload)
+            if response.status_code == 200:
+                result = response.json()["choices"][0]["message"]["content"]
+                print(result)
+                return JsonResponse({ 'success': True, 'result': result})
+            else:
+                return JsonResponse({'success': False,'error': f"API Error: {response.status_code}",'details': response.text }, status=500)
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
 class PlantDetailView(DetailView):
     model = Plant
     template_name = 'plants/plant_detail.html'
@@ -138,6 +238,50 @@ class PlantDetailView(DetailView):
         context['plant'] = plant
         context['page_obj'] = page_obj
         return context
+def generate_plant_pdf(request, pk):
+    plant_id = int(pk)
+    plant = get_object_or_404(Plant, pk=plant_id)
+    plant_name = plant.name
+
+    context = {
+        'plant': plant,
+    }
+
+    html_string = render_to_string('plants/pdf_plant_detail_template.html', context)
+    html = HTML(string=html_string)
+    pdf_file = html.write_pdf()
+
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{plant_name}_detail.pdf"'
+    return response
+class AddCommentView(LoginRequiredMixin,View):
+    def post(self, request, *args, **kwargs):
+        try:
+
+            data = json.loads(request.body)
+            try:
+                plant_id = int(data.get("plant_id"))
+            except (ValueError, TypeError):
+                return JsonResponse({"success": False, "error": "Invalid plant ID."})
+            comment = data.get("comment", "").strip()
+            if not comment:
+                return JsonResponse({"success": False, "error": "Comment cannot be empty."})
+            if not Plant.objects.filter(pk=plant_id).exists():
+                return JsonResponse({"success": False, "error": "Plant not found."})
+            user_id = request.user.pk
+            PlantDetailComments.objects.create(
+                plant_id=plant_id,
+                user_id=user_id,
+                comment=comment
+            )
+            return JsonResponse({"success": True})
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON."})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"success": False, "error": "Invalid request method."})
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'plants/dashboard.html'
@@ -166,18 +310,7 @@ class RegisterView(CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('login')
 
-class AddEventView(LoginRequiredMixin,View):
-    def post(self, request, *args, **kwargs):
-        form = EventForm(request.POST)
-        if form.is_valid():
-            event = form.save(commit=False)
-            event.user = request.user
-            event.save()
-            return JsonResponse({'success': True})
-        else:
-            errors = form.errors.get_json_data()
-            error_list = [v[0]['message'] for k, v in errors.items()]
-            return JsonResponse({'success': False, 'errors': error_list})
+
 
 class GeneratePDFView(LoginRequiredMixin,View):
     def get(self, request, *args, **kwargs):
@@ -244,66 +377,7 @@ class GeneratePDFView(LoginRequiredMixin,View):
         response['Content-Disposition'] = 'attachment; filename="month_planner.pdf"'
         return response
 
-class DiagnosePlantView(PermissionRequiredMixin,View):
-    permission_required = ('plants.can_diagnose',)
-    def post(self, request):
-        if 'image' not in request.FILES:
-            return JsonResponse({'error': 'No image provided'}, status=400)
 
-        try:
-            # Get file from request
-            file = request.FILES.get('image')
-            plant_id=int(request.POST.get('plant_id'))
-            plant = get_object_or_404(Plant, pk=plant_id)
-            prompt = f"The photo is of {plant.name}. Rate the condition of the plant in this photo on a scale of 1-5, return a rating and provide possible causes of problems. Do not use markdown, limit yourself to 100 words.Return result as dictionary with two variables - rating and note."
-
-            # Read image data
-            image_data = file.read()
-
-            # Encode to base64
-            base64_image = base64.b64encode(image_data).decode('utf-8')
-
-            # Get file format from filename
-            image_format = file.name.rsplit('.', 1)[1].lower() if '.' in file.name else 'jpeg'
-
-            # Get API key - preferably from environment variables
-            api_key = os.environ.get("XAI_API_KEY", "xai-KEY")
-
-            # Call Vision API
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}"
-            }
-
-            payload = {
-                "model": "grok-2-vision-1212",
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/{image_format};base64,{base64_image}"
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-
-            response = requests.post("https://api.x.ai/v1/chat/completions",headers=headers,json=payload)
-            if response.status_code == 200:
-                result = response.json()["choices"][0]["message"]["content"]
-                result=json.loads(result)
-                AIRating.objects.create(plant=plant,user=self.request.user,note=result['note'],rating=result['rating'])
-                return JsonResponse({ 'success': True, 'diagnosis': result})
-            else:
-                return JsonResponse({'success': False,'error': f"API Error: {response.status_code}",'details': response.text }, status=500)
-
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 def generate_plotly_chart(labels, values):
     trace = go.Scatter(
@@ -438,41 +512,67 @@ class OwnedPlantDetailView(LoginRequiredMixin,TemplateView):
             return context
         else:
             return redirect('dashboard')
-class FinishEventView(LoginRequiredMixin,View):
-    def post(self, request, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-            event_id = int(data.get("event_id"))
-            event = get_object_or_404(Event, pk=event_id)
-            if event.user == request.user:
-                event.is_finished = True
-                event.date = datetime.today()
-                event.save()
-                return JsonResponse({"success": True})
-            return JsonResponse({"success": False, "error": "Event doesn't exist"})
-        except Event.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Event doesn't exist"})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
+class DiagnosePlantView(PermissionRequiredMixin,View):
+    permission_required = ('plants.can_diagnose',)
+    def post(self, request):
+        if 'image' not in request.FILES:
+            return JsonResponse({'error': 'No image provided'}, status=400)
 
-    def get(self, request, *args, **kwargs):
-        return JsonResponse({"success": False, "error": "Bad request"})
-class CancelEventView(LoginRequiredMixin,View):
-    def post(self, request, *args, **kwargs):
         try:
-            data = json.loads(request.body)
-            event_id = int(data.get("event_id"))
-            event = get_object_or_404(Event, pk=event_id)
-            if event.user == request.user:
-                event.delete()
-            return JsonResponse({"success": True})
-        except Event.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Event doesn't exist"})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
+            # Get file from request
+            file = request.FILES.get('image')
+            plant_id=int(request.POST.get('plant_id'))
+            plant = get_object_or_404(Plant, pk=plant_id)
+            prompt = f"The photo is of {plant.name}. Rate the condition of the plant in this photo on a scale of 1-5, return a rating and provide possible causes of problems. Do not use markdown, limit yourself to 100 words.Return result as dictionary with two variables - rating and note."
 
-    def get(self, request, *args, **kwargs):
-        return JsonResponse({"success": False, "error": "Bad request"})
+            # Read image data
+            image_data = file.read()
+
+            # Encode to base64
+            base64_image = base64.b64encode(image_data).decode('utf-8')
+
+            # Get file format from filename
+            image_format = file.name.rsplit('.', 1)[1].lower() if '.' in file.name else 'jpeg'
+
+            # Get API key - preferably from environment variables
+            api_key = os.environ.get("XAI_API_KEY", "xai-KEY")
+
+            # Call Vision API
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}"
+            }
+
+            payload = {
+                "model": "grok-2-vision-1212",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/{image_format};base64,{base64_image}"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+
+            response = requests.post("https://api.x.ai/v1/chat/completions",headers=headers,json=payload)
+            if response.status_code == 200:
+                result = response.json()["choices"][0]["message"]["content"]
+                result=json.loads(result)
+                AIRating.objects.create(plant=plant,user=self.request.user,note=result['note'],rating=result['rating'])
+                return JsonResponse({ 'success': True, 'diagnosis': result})
+            else:
+                return JsonResponse({'success': False,'error': f"API Error: {response.status_code}",'details': response.text }, status=500)
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
 class AddNoteView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
         try:
@@ -661,51 +761,7 @@ class ChangeWateringFrequencyView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         return JsonResponse({"success": False, "error": "Invalid request method."})
-class AddCommentView(LoginRequiredMixin,View):
-    def post(self, request, *args, **kwargs):
-        try:
 
-            data = json.loads(request.body)
-            try:
-                plant_id = int(data.get("plant_id"))
-            except (ValueError, TypeError):
-                return JsonResponse({"success": False, "error": "Invalid plant ID."})
-            comment = data.get("comment", "").strip()
-            if not comment:
-                return JsonResponse({"success": False, "error": "Comment cannot be empty."})
-            if not Plant.objects.filter(pk=plant_id).exists():
-                return JsonResponse({"success": False, "error": "Plant not found."})
-            user_id = request.user.pk
-            PlantDetailComments.objects.create(
-                plant_id=plant_id,
-                user_id=user_id,
-                comment=comment
-            )
-            return JsonResponse({"success": True})
-        except json.JSONDecodeError:
-            return JsonResponse({"success": False, "error": "Invalid JSON."})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-
-    def get(self, request, *args, **kwargs):
-        return JsonResponse({"success": False, "error": "Invalid request method."})
-
-def generate_plant_pdf(request, pk):
-    plant_id = int(pk)
-    plant = get_object_or_404(Plant, pk=plant_id)
-    plant_name = plant.name
-
-    context = {
-        'plant': plant,
-    }
-
-    html_string = render_to_string('plants/pdf_plant_detail_template.html', context)
-    html = HTML(string=html_string)
-    pdf_file = html.write_pdf()
-
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{plant_name}_detail.pdf"'
-    return response
 
 class RemoveFromOwnedView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
@@ -719,63 +775,7 @@ class RemoveFromOwnedView(LoginRequiredMixin,View):
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
 
-class WhatPlantView(PermissionRequiredMixin,View):
-    permission_required = ('plants.can_diagnose',)
-    def post(self, request):
-        if 'image' not in request.FILES:
-            return JsonResponse({'error': 'No image provided'}, status=400)
 
-        try:
-            # Get file from request
-            file = request.FILES.get('image')
-            prompt = f"Tell me what plant it is in the photo and how sure you are of that. Give me 3 options with level of certainty, full name of a plant and popular name.All the text should be raw, no markdown etc."
-
-            # Read image data
-            image_data = file.read()
-
-            # Encode to base64
-            base64_image = base64.b64encode(image_data).decode('utf-8')
-
-            # Get file format from filename
-            image_format = file.name.rsplit('.', 1)[1].lower() if '.' in file.name else 'jpeg'
-
-            # Get API key - preferably from environment variables
-            api_key = os.environ.get("XAI_API_KEY", "xai-KEY")
-
-            # Call Vision API
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}"
-            }
-
-            payload = {
-                "model": "grok-2-vision-1212",
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/{image_format};base64,{base64_image}"
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-
-            response = requests.post("https://api.x.ai/v1/chat/completions",headers=headers,json=payload)
-            if response.status_code == 200:
-                result = response.json()["choices"][0]["message"]["content"]
-                print(result)
-                return JsonResponse({ 'success': True, 'result': result})
-            else:
-                return JsonResponse({'success': False,'error': f"API Error: {response.status_code}",'details': response.text }, status=500)
-
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 class DeleteUserNoteView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
