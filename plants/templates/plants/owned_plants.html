@@ -7,9 +7,11 @@
     </div>
     <div class="plant-sum-up">
         <div class="classification section-header">
+                {% if plant.image %}
                     <div class="owned-plant-details-image">
                         <img src="{{ plant.image.url }}" alt="{{ plant.name }}" />
                     </div>
+                {% endif %}
                     <h1 class="section-header">{{ plant.name }}</h1>  <!-- Odwołanie do plant.name -->
         </div>
         <div class="owned-plant-section">

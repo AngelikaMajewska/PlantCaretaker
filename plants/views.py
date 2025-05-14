@@ -14,7 +14,7 @@ from collections import defaultdict
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, FormView, DetailView, CreateView, View, UpdateView
-from django.http import JsonResponse, HttpResponseForbidden
+from django.http import JsonResponse, HttpResponseForbidden, Http404
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 
@@ -149,6 +149,7 @@ class AllEventsView(View):
             })
 
         return JsonResponse(event_list, safe=False)
+
 class CatalogView(TemplateView):
     template_name = 'plants/catalog.html'
 
@@ -603,6 +604,7 @@ def get_watering_differences(plant_id):
         return chart_html
 class OwnedPlantDetailView(LoginRequiredMixin,TemplateView):
     template_name = 'plants/owned_plants.html'
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         plant_id = int(self.kwargs['pk'])
@@ -638,7 +640,8 @@ class OwnedPlantDetailView(LoginRequiredMixin,TemplateView):
             context['can_diagnose'] = self.request.user.has_perm('plants.can_diagnose')
             return context
         else:
-            return redirect('dashboard')
+            raise Http404("Plant not owned by this user.")
+
 class DiagnosePlantView(PermissionRequiredMixin,View):
     permission_required = ('plants.can_diagnose',)
     def post(self, request):
@@ -753,11 +756,6 @@ class DeleteUserNoteView(LoginRequiredMixin,View):
 
 
 
-
-
-
-
-
 class UserProfileView(LoginRequiredMixin, View):
     template_name = 'plants/user_profile.html'
 
@@ -784,14 +782,6 @@ class UserProfileView(LoginRequiredMixin, View):
             'user_form': user_form,
             'location_form': location_form
         })
-
-
-
-
-
-
-
-
 
 class RegisterView(CreateView):
     template_name = 'plants/register.html'

@@ -689,4 +689,37 @@ def test_wishlist_remove_from_owned_dashboard_no_owned_fail(client, user_logged,
     assert response.status_code == 200
     assert response.json()['success'] is False
 
+#OwnedPlantDetailView
+@pytest.mark.django_db
+def test_owned_plant_logged(client, user_logged,owned_plants):
+    client.force_login(user_logged)
+    for item in owned_plants:
+        response = client.get(f'/my-plants/{item.plant.pk}/')
+        assert response.status_code == 200
+
+#OwnedPlantDetailView
+@pytest.mark.django_db
+def test_owned_plant_not_logged_fail(client, user_logged,owned_plants):
+    for item in owned_plants:
+        response = client.get(f'/my-plants/{item.plant.pk}/')
+        assert response.status_code == 302
+
+#OwnedPlantDetailView
+@pytest.mark.django_db
+def test_plant_not_owned_fail(client, user_logged):
+    client.force_login(user_logged)
+    response = client.get(f'/my-plants/35463/')
+    assert response.status_code == 404
+
+#OwnedPlantDetailView
+@pytest.mark.django_db
+def test_no_owned_plants_fail(client, user_logged, owned_plants):
+    other_user = User.objects.create_user(username="otheruser", password="otherpass")
+    client.force_login(other_user)
+    for item in owned_plants:
+        response = client.get(f'/my-plants/{item.plant.pk}/')
+        assert response.status_code == 404
+
 #AllEventsView
+# generate_plotly_chart
+# get_watering_differences
