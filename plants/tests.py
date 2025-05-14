@@ -594,4 +594,6 @@ def test_dashboard_pdf_generate_not_logged_fail(client):
     response = client.get(f'/generate-pdf/')
     assert response.status_code == 302
 
+#WishlistRemoveView for DashboardView
+
 #AllEventsView
