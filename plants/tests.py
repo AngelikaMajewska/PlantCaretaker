@@ -7,7 +7,9 @@ from pypdf import PdfReader
 import pytest
 from django.urls import reverse
 
-from plants.models import Plant, SoilType, WishList, Watering
+from plants.models import Plant, SoilType, WishList, Watering, OwnedPlants
+
+
 # from functions import ...
 
 # PlantDetailView
@@ -595,5 +597,45 @@ def test_dashboard_pdf_generate_not_logged_fail(client):
     assert response.status_code == 302
 
 #WishlistRemoveView for DashboardView
+@pytest.mark.django_db
+def test_wishlist_remove_from_dashboard_logged(client, user_logged,owned_plants,multiple_wishlist):
+    client.force_login(user_logged)
+    to_remove = multiple_wishlist[0]
+    data = { 'plant_id': to_remove.plant.pk, }
+    response = client.post('/wishlist-remove/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is True
+    assert len(WishList.objects.filter(owner=user_logged)) == 2
+
+#WishlistRemoveView for DashboardView
+@pytest.mark.django_db
+def test_wishlist_remove_from_dashboard_not_logged_fail(client, user_logged,owned_plants,multiple_wishlist):
+    to_remove = multiple_wishlist[0]
+    data = { 'plant_id': to_remove.plant.pk, }
+    response = client.post('/wishlist-remove/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 302
+
+#WishlistRemoveView for DashboardView
+@pytest.mark.django_db
+def test_wishlist_remove_from_dashboard_missing_record_fail(client, user_logged,owned_plants,multiple_wishlist):
+    client.force_login(user_logged)
+    to_remove = multiple_wishlist[0]
+    data = { 'plant_id': to_remove.plant.pk, }
+    WishList.objects.get(id = to_remove.pk).delete()
+    response = client.post('/wishlist-remove/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is False
+
+#WishlistBoughtView for DashboardView
+@pytest.mark.django_db
+def test_wishlist_bought_from_dashboard_logged(client, user_logged,multiple_wishlist):
+    client.force_login(user_logged)
+    to_buy = multiple_wishlist[0]
+    data = { 'plant_id': to_buy.plant.pk, }
+    response = client.post('/wishlist-bought/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is True
+    assert OwnedPlants.objects.get(owner=user_logged,plant=to_buy.plant)
+
 
 #AllEventsView

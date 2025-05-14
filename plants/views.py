@@ -459,7 +459,6 @@ class GeneratePDFView(LoginRequiredMixin,View):
         response = HttpResponse(pdf_file, content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="month_planner.pdf"'
         return response
-
 class WishlistRemoveView(LoginRequiredMixin,View):
     def post(self, request, *args, **kwargs):
         try:
