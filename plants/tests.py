@@ -1,6 +1,8 @@
 import json
 from datetime import date, timedelta
 from django.contrib.auth.models import User
+from io import BytesIO
+from pypdf import PdfReader
 
 import pytest
 from django.urls import reverse
@@ -550,6 +552,39 @@ def test_dashboard_pdf_generate(client, user_logged,event,multiple_wishlist,owne
     content = response.content
     assert len(content) > 100
     assert 'attachment' in response.get('Content-Disposition', '')
+    pdf_reader = PdfReader(BytesIO(response.content))
+    text = ''
+    for page in pdf_reader.pages:
+        page_text = page.extract_text()
+        if page_text:
+            text += page_text
 
+    assert "Events of the month" in text
+    assert "Wishlist" in text
+    assert "Planned waterings" in text
+    assert "No events added." not in text
+    assert "No plants added." not in text
 
+#GeneratePDFView for DashboardView
+@pytest.mark.django_db
+def test_dashboard_pdf_generate_no_data_fail(client, user_logged):
+    client.force_login(user_logged)
+    response = client.get('/generate-pdf/')
+
+    assert response.status_code == 200
+    assert response['Content-Type'] == 'application/pdf'
+    assert 'attachment' in response.get('Content-Disposition', '')
+
+    pdf_reader = PdfReader(BytesIO(response.content))
+    text = ''
+    for page in pdf_reader.pages:
+        page_text = page.extract_text()
+        if page_text:
+            text += page_text
+
+    assert "Events of the month" not in text
+    assert "Wishlist" not in text
+    assert "Planned waterings" not in text
+    assert "No events added." in text
+    assert "No plants added." in text
 #AllEventsView

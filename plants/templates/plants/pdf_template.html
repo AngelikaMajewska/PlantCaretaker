@@ -33,7 +33,9 @@
 </head>
 <body style="width: 100%; margin:0">
     <div style="width: 100%">
-        <h1>Events of the month</h1>
+        {% if events %}
+            <h1>Events of the month</h1>
+        {% endif %}
         {% for event in events %}
           <div class="event">
               <div class="event-header">
@@ -50,7 +52,9 @@
           {% endfor %}
     </div>
     <div>
-        <h1>Wishlist</h1>
+        {% if wishlist %}
+            <h1>Wishlist</h1>
+        {% endif %}
         <div class="wishlist">
             <ul>
                   {% for plant in wishlist %}
@@ -62,7 +66,9 @@
         </div>
     </div>
     <div class="planned-waterings">
-        <h1>Planned waterings</h1>
+        {%  if  grouped_by_day.items%}
+            <h1>Planned waterings</h1>
+        {%  endif %}
         <div>
             <ul>
                   {% for day, plants in grouped_by_day.items %}
