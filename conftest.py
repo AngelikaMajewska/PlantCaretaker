@@ -66,7 +66,7 @@ def client():
 
 @pytest.fixture
 def user_with_permission(db):
-    user = User.objects.create_user(username='testuser', password='testpass')
+    user = User.objects.create_user(username='testuser1', password='testpass')
     permission = Permission.objects.get(codename='add_plant')
     user.user_permissions.add(permission)
     user.save()
@@ -74,7 +74,7 @@ def user_with_permission(db):
 
 @pytest.fixture
 def user_can_diagnose(db):
-    user = User.objects.create_user(username='testuser', password='testpass')
+    user = User.objects.create_user(username='testuser2', password='testpass')
     permission = Permission.objects.get(codename='can_diagnose')
     user.user_permissions.add(permission)
     user.save()

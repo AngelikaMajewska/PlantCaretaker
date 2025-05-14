@@ -1,4 +1,6 @@
 import json
+from datetime import date, timedelta
+from django.contrib.auth.models import User
 
 import pytest
 from django.urls import reverse
@@ -480,5 +482,74 @@ def test_watering_wrong_days_fail(client,user_logged,owned_plants):
     assert response.status_code == 200
     assert response.json()['success'] is False
     assert response.json()['error'] == "Invalid count of days."
+
+#FinishWateringView for DashboardView
+@pytest.mark.django_db
+def test_finish_watering_logged(client,user_logged,owned_plants):
+    client.force_login(user_logged)
+    waterings = Watering.objects.filter(user=user_logged)
+    data ={
+        'watering_id': waterings[0].pk,
+        'fertilizer': "True",
+    }
+    response = client.post('/finish-watering/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is True
+
+#FinishWateringView for DashboardView
+@pytest.mark.django_db
+def test_finish_watering_not_logged_fail(client,user_logged,owned_plants):
+    waterings = Watering.objects.filter(user=user_logged)
+    data ={
+        'watering_id': waterings[0].pk,
+        'fertilizer': "True",
+    }
+    response = client.post('/finish-watering/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 302
+
+#FinishWateringView for DashboardView
+@pytest.mark.django_db
+def test_finish_watering_wrong_id_fail(client,user_logged,owned_plants):
+    client.force_login(user_logged)
+    data ={
+        'watering_id': 42335,
+        'fertilizer': "True",
+    }
+    response = client.post('/finish-watering/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['error'] == "No Watering matches the given query."
+
+#FinishWateringView for DashboardView
+@pytest.mark.django_db
+def test_finish_watering_user_not_owner_of_plant_fail(client, user_logged, three_plants):
+    client.force_login(user_logged)
+    other_user = User.objects.create_user(username="otheruser", password="otherpass")
+    foreign_plant = three_plants[0]
+    watering = Watering.objects.create(
+        user=other_user,
+        plant=foreign_plant,
+        date=date.today(),
+        fertiliser=False,
+        next_watering=date.today() + timedelta(days=5)
+    )
+    data = {'watering_id': watering.pk, 'fertilizer': "True"}
+    response = client.post('/finish-watering/', data=json.dumps(data), content_type='application/json')
+
+    # Sprawdzamy odpowiedź
+    assert response.status_code == 200
+    assert response.json()['success'] is False
+    assert response.json()['error'] == "No OwnedPlants matches the given query."
+
+#GeneratePDFView for DashboardView
+@pytest.mark.django_db
+def test_dashboard_pdf_generate(client, user_logged,event,multiple_wishlist,owned_plants):
+    client.force_login(user_logged)
+    response = client.get(f'/generate-pdf/')
+    assert response.status_code == 200
+    assert response['Content-Type'] == 'application/pdf'
+    content = response.content
+    assert len(content) > 100
+    assert 'attachment' in response.get('Content-Disposition', '')
+
 
 #AllEventsView
