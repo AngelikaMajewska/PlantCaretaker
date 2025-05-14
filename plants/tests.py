@@ -637,5 +637,56 @@ def test_wishlist_bought_from_dashboard_logged(client, user_logged,multiple_wish
     assert response.json()['success'] is True
     assert OwnedPlants.objects.get(owner=user_logged,plant=to_buy.plant)
 
+#WishlistBoughtView for DashboardView
+@pytest.mark.django_db
+def test_wishlist_bought_from_dashboard_not_logged_fail(client, user_logged,multiple_wishlist):
+    to_buy = multiple_wishlist[0]
+    data = { 'plant_id': to_buy.plant.pk, }
+    response = client.post('/wishlist-bought/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 302
+
+#WishlistBoughtView for DashboardView
+@pytest.mark.django_db
+def test_wishlist_bought_from_dashboard_missing_data_fail(client, user_logged,multiple_wishlist):
+    client.force_login(user_logged)
+    to_buy = multiple_wishlist[0]
+    data = { 'plant_id': to_buy.plant.pk, }
+    WishList.objects.get(id = to_buy.pk).delete()
+    response = client.post('/wishlist-bought/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is False
+    assert response.json()['error'] == "No WishList matches the given query."
+
+#RemoveFromOwnedView for DashboardView
+@pytest.mark.django_db
+def test_wishlist_remove_from_owned_dashboard_logged(client, user_logged,owned_plants):
+    client.force_login(user_logged)
+    to_remove = owned_plants[0]
+    data = { 'plant_id': to_remove.plant.pk, }
+    # OwnedPlants.objects.get(owner=user_logged,plant=to_remove.plant).delete()
+    response = client.post('/remove-from-owned/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is True
+    assert len(OwnedPlants.objects.filter(owner=user_logged)) == 2
+
+#RemoveFromOwnedView for DashboardView
+@pytest.mark.django_db
+def test_wishlist_remove_from_owned_dashboard_not_logged_fail(client, user_logged,owned_plants):
+    to_remove = owned_plants[0]
+    data = { 'plant_id': to_remove.plant.pk, }
+    # OwnedPlants.objects.get(owner=user_logged,plant=to_remove.plant).delete()
+    response = client.post('/remove-from-owned/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 302
+
+#RemoveFromOwnedView for DashboardView
+@pytest.mark.django_db
+def test_wishlist_remove_from_owned_dashboard_no_owned_fail(client, user_logged,owned_plants):
+    client.force_login(user_logged)
+    to_remove = owned_plants[0]
+    data = { 'plant_id': to_remove.plant.pk, }
+    OwnedPlants.objects.get(owner=user_logged,plant=to_remove.plant).delete()
+    response = client.post('/remove-from-owned/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is False
 
 #AllEventsView
