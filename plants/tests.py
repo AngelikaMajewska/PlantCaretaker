@@ -201,24 +201,32 @@ def test_remove_from_wishlist_not_logged_fail(client):
 
 #PlantDetailView
 @pytest.mark.django_db
-def test_pdf_generate(client, plant):
+def test_pdf_generate_button_visible(client, plant):
     response = client.get(f'/plants/{plant.pk}/')
     assert response.status_code == 200
     html = response.content.decode()
     assert 'generate-plant-pdf' in html
 
-#PlantDetailView
+#generate_plant_pdf for PlantDetailView
 @pytest.mark.django_db
 def test_generate_plant_pdf(client,plant):
-    url = reverse('generate-plant-pdf', args=[plant.pk])
-    response = client.get(url)
+    response = client.get(f'/generate-plant-pdf/{plant.pk}/')
     assert response.status_code == 200
     assert response['Content-Type'] == 'application/pdf'
-    assert 'Content-Disposition' in response
-    assert f'{plant.name}_detail.pdf' in response['Content-Disposition']
-    assert len(response.content) > 100
+    content = response.content
+    assert len(content) > 100
+    assert 'attachment' in response.get('Content-Disposition', '')
+    pdf_reader = PdfReader(BytesIO(response.content))
+    text = ''
+    for page in pdf_reader.pages:
+        page_text = page.extract_text()
+        if page_text:
+            text += page_text
 
-#PlantDetailView
+    assert f"{plant.name}" in text
+    assert f"{plant.description}" in text
+
+#AddCommentView for PlantDetailView
 @pytest.mark.django_db
 def test_add_comment_form_logged(client, plant,user_logged):
     client.force_login(user_logged)
@@ -227,7 +235,7 @@ def test_add_comment_form_logged(client, plant,user_logged):
     html = response.content.decode()
     assert 'add-comment-form' in html
 
-#PlantDetailView
+#AddCommentView for PlantDetailView
 @pytest.mark.django_db
 def test_add_comment_form_not_logged(client, plant):
     response = client.get(f'/plants/{plant.pk}/')
@@ -235,15 +243,7 @@ def test_add_comment_form_not_logged(client, plant):
     html = response.content.decode()
     assert 'add-comment-form' not in html
 
-#PlantDetailView
-@pytest.mark.django_db
-def test_add_comment_form_not_logged(client, plant):
-    response = client.get(f'/plants/{plant.pk}/')
-    assert response.status_code == 200
-    html = response.content.decode()
-    assert 'add-comment-form' not in html
-
-#PlantDetailView
+#AddCommentView for PlantDetailView
 @pytest.mark.django_db
 def test_add_comment(client,plant,user_logged):
     client.force_login(user_logged)
@@ -255,7 +255,7 @@ def test_add_comment(client,plant,user_logged):
     assert response.status_code == 200
     assert response.json()['success'] is True
 
-#PlantDetailView
+#AddCommentView for PlantDetailView
 @pytest.mark.django_db
 def test_add_comment_empty_fail(client,plant,user_logged):
     client.force_login(user_logged)
@@ -267,7 +267,7 @@ def test_add_comment_empty_fail(client,plant,user_logged):
     assert response.json()['success'] is False
     assert response.json()['error'] == "Comment cannot be empty."
 
-#PlantDetailView
+#AddCommentView for PlantDetailView
 @pytest.mark.django_db
 def test_add_comment_method_get_fail(client,plant,user_logged):
     client.force_login(user_logged)
@@ -276,20 +276,20 @@ def test_add_comment_method_get_fail(client,plant,user_logged):
     assert response.json()['success'] is False
     assert response.json()['error'] == "Invalid request method."
 
-#Calendar
+#CalendarView
 @pytest.mark.django_db
 def test_calendar_not_logged_fail(client):
     response = client.get('/calendar/')
     assert response.status_code == 302
 
-#Calendar
+#CalendarView
 @pytest.mark.django_db
 def test_calendar_logged(client,user_logged):
     client.force_login(user_logged)
     response = client.get('/calendar/')
     assert response.status_code == 200
 
-#AddEventView
+#AddEventView for CalendarView
 @pytest.mark.django_db
 def test_add_event(client,user_logged,event):
     client.force_login(user_logged)
@@ -303,7 +303,7 @@ def test_add_event(client,user_logged,event):
     assert response.status_code == 200
     assert response.json()['success'] is True
 
-#AddEventView
+#AddEventView for CalendarView
 @pytest.mark.django_db
 def test_add_event_missing_data_fail(client,user_logged,event):
     client.force_login(user_logged)
@@ -316,7 +316,7 @@ def test_add_event_missing_data_fail(client,user_logged,event):
     assert response.status_code == 200
     assert response.json()['success'] is False
 
-#AddEventView
+#AddEventView for CalendarView
 @pytest.mark.django_db
 def test_add_event_not_logged_fail(client,event):
     event = {
@@ -329,7 +329,7 @@ def test_add_event_not_logged_fail(client,event):
     assert response.status_code == 302
     assert '/login' in response.url or '/accounts/login' in response.url
 
-#FinishEventView
+#FinishEventView for CalendarView
 @pytest.mark.django_db
 def test_finish_event_logged(client,user_logged,event):
     client.force_login(user_logged)
@@ -341,7 +341,7 @@ def test_finish_event_logged(client,user_logged,event):
     assert response.status_code == 200
     assert response.json()['success'] is True
 
-#FinishEventView
+#FinishEventView for CalendarView
 @pytest.mark.django_db
 def test_finish_event_wrong_id_fail(client,user_logged,event):
     client.force_login(user_logged)
@@ -353,7 +353,7 @@ def test_finish_event_wrong_id_fail(client,user_logged,event):
     assert response.status_code == 200
     assert response.json()['success'] is False
 
-#FinishEventView
+#FinishEventView for CalendarView
 @pytest.mark.django_db
 def test_finish_event_not_logged(client,event):
     data={
@@ -362,7 +362,7 @@ def test_finish_event_not_logged(client,event):
     response = client.post('/finish-event/', data=json.dumps(data),content_type='application/json')
     assert response.status_code == 302
 
-#CancelEventView
+#CancelEventView for CalendarView
 @pytest.mark.django_db
 def test_cancel_event_logged(client,user_logged,event):
     client.force_login(user_logged)
@@ -374,7 +374,7 @@ def test_cancel_event_logged(client,user_logged,event):
     assert response.status_code == 200
     assert response.json()['success'] is True
 
-#CancelEventView
+#CancelEventView for CalendarView
 @pytest.mark.django_db
 def test_cancel_event_wrong_id_fail(client,user_logged,event):
     client.force_login(user_logged)
@@ -386,7 +386,7 @@ def test_cancel_event_wrong_id_fail(client,user_logged,event):
     assert response.status_code == 200
     assert response.json()['success'] is False
 
-#CancelEventView
+#CancelEventView for CalendarView
 @pytest.mark.django_db
 def test_cancel_event_not_logged(client,event):
     data={
@@ -587,4 +587,11 @@ def test_dashboard_pdf_generate_no_data_fail(client, user_logged):
     assert "Planned waterings" not in text
     assert "No events added." in text
     assert "No plants added." in text
+
+#GeneratePDFView for DashboardView
+@pytest.mark.django_db
+def test_dashboard_pdf_generate_not_logged_fail(client):
+    response = client.get(f'/generate-pdf/')
+    assert response.status_code == 302
+
 #AllEventsView
