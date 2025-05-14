@@ -410,10 +410,75 @@ def test_dashboard_logged(client,user_logged,owned_plants,multiple_wishlist):
     for plant in multiple_wishlist:
         assert WishList.objects.filter(owner=user_logged, plant_id=plant.plant.pk).exists()
 
+#MoveWateringView for DashboardView
+@pytest.mark.django_db
+def test_watering_logged(client,user_logged,owned_plants):
+    client.force_login(user_logged)
+    waterings = Watering.objects.filter(user=user_logged)
+    data ={
+        'watering_id': waterings[0].pk,
+        'plant_id': waterings[0].plant.pk,
+        'days': 1,
+    }
+    response = client.post('/move-watering/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is True
 
+#MoveWateringView for DashboardView
+@pytest.mark.django_db
+def test_watering_not_logged(client,user_logged,owned_plants):
+    waterings = Watering.objects.filter(user=user_logged)
+    data ={
+        'watering_id': waterings[0].pk,
+        'plant_id': 12435,
+        'days': 1,
+    }
+    response = client.post('/move-watering/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 302
 
+#MoveWateringView for DashboardView
+@pytest.mark.django_db
+def test_watering_wrong_plant_fail(client,user_logged,owned_plants):
+    client.force_login(user_logged)
+    waterings = Watering.objects.filter(user=user_logged)
+    data ={
+        'watering_id': waterings[0].pk,
+        'plant_id': 12435,
+        'days': 1,
+    }
+    response = client.post('/move-watering/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is False
+    assert response.json()['error'] == "Invalid data"
 
+#MoveWateringView for DashboardView
+@pytest.mark.django_db
+def test_watering_wrong_id_fail(client,user_logged,owned_plants):
+    client.force_login(user_logged)
+    waterings = Watering.objects.filter(user=user_logged)
+    data ={
+        'watering_id': 1245,
+        'plant_id': waterings[0].plant.pk,
+        'days': 1,
+    }
+    response = client.post('/move-watering/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is False
+    assert response.json()['error'] == "No Watering matches the given query."
 
-
+#MoveWateringView for DashboardView
+@pytest.mark.django_db
+def test_watering_wrong_days_fail(client,user_logged,owned_plants):
+    client.force_login(user_logged)
+    waterings = Watering.objects.filter(user=user_logged)
+    data ={
+        'watering_id': waterings[0].pk,
+        'plant_id': waterings[0].plant.pk,
+        'days': 5,
+    }
+    response = client.post('/move-watering/', data=json.dumps(data), content_type='application/json')
+    assert response.status_code == 200
+    assert response.json()['success'] is False
+    assert response.json()['error'] == "Invalid count of days."
 
 #AllEventsView

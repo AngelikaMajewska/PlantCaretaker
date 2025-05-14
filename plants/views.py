@@ -349,6 +349,8 @@ class MoveWateringView(LoginRequiredMixin, View):
                     watering.save()
                     return JsonResponse({"success": True})
                 return JsonResponse({"success": False, "error": "Invalid data"})
+            else:
+                return JsonResponse({"success": False, "error": "Invalid count of days."})
         except Watering.DoesNotExist:
             return JsonResponse({"success": False, "error": "Watering not found on the list."})
         except Exception as e:
