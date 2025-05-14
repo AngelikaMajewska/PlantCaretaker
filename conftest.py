@@ -212,3 +212,37 @@ def owned_plants(user_logged):
         owned_plant = OwnedPlants.objects.create_owned_plant_with_watering(owner=user_logged,plant=plant,owner_watering_frequency=1)
         owned.append(owned_plant)
     return owned
+
+@pytest.fixture
+def owned_plants_user_can_diagnose(user_can_diagnose):
+    ing1 = SoilIngredient.objects.create(name="Compost", description="Nutrient-rich")
+    soil = SoilType.objects.create(name="Soil A", description="Type A")
+    soil.ingredients.set([ing1])
+
+    plant_one = Plant.objects.create(
+        name='Test Plant 1',
+        description='Test description 1',
+        soil=soil,
+        light=1,
+        watering_frequency=4
+    )
+    plant_two = Plant.objects.create(
+        name='Test Plant 2',
+        description='Test description 2',
+        soil=soil,
+        light=2,
+        watering_frequency=5
+    )
+    plant_three = Plant.objects.create(
+        name='Test Plant 3',
+        description='Test description 3',
+        soil=soil,
+        light=3,
+        watering_frequency=6
+    )
+    plant_list = [plant_one, plant_two, plant_three]
+    owned =[]
+    for plant in plant_list:
+        owned_plant = OwnedPlants.objects.create_owned_plant_with_watering(owner=user_can_diagnose,plant=plant,owner_watering_frequency=1)
+        owned.append(owned_plant)
+    return owned

@@ -720,6 +720,24 @@ def test_no_owned_plants_fail(client, user_logged, owned_plants):
         response = client.get(f'/my-plants/{item.plant.pk}/')
         assert response.status_code == 404
 
-#AllEventsView
-# generate_plotly_chart
-# get_watering_differences
+#DiagnosePlantView for OwnedPlantDetailView
+@pytest.mark.django_db
+def test_diagnose_logged_user_can_diagnose_permission(client, user_can_diagnose,owned_plants_user_can_diagnose):
+    client.force_login(user_can_diagnose)
+    plant=owned_plants_user_can_diagnose[0]
+    response = client.get(f'/my-plants/{plant.plant.pk}/')
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert 'ai-rating-container' in html
+
+#DiagnosePlantView for OwnedPlantDetailView
+@pytest.mark.django_db
+def test_diagnose_logged_user_no_permission_fail(client, user_logged,owned_plants):
+    client.force_login(user_logged)
+    plant=owned_plants[0]
+    response = client.get(f'/my-plants/{plant.plant.pk}/')
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert 'ai-rating-container' not in html
+
+

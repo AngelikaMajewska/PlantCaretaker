@@ -653,7 +653,12 @@ class DiagnosePlantView(PermissionRequiredMixin,View):
             file = request.FILES.get('image')
             plant_id=int(request.POST.get('plant_id'))
             plant = get_object_or_404(Plant, pk=plant_id)
-            prompt = f"The photo is of {plant.name}. Rate the condition of the plant in this photo on a scale of 1-5, return a rating and provide possible causes of problems. Do not use markdown, limit yourself to 100 words.Return result as dictionary with two variables - rating and note."
+            prompt = (
+                f"The photo is of {plant.name}. Rate the condition of the plant in this photo "
+                f"on a scale of 1 to 5. Return the result as a JSON object with two keys: "
+                f'"rating" (a number) and "note" (a short text). Do not use markdown or explanations. '
+                f"Limit the note to 100 words."
+            )
 
             # Read image data
             image_data = file.read()

@@ -506,6 +506,7 @@ footer{
     color: #373737;
     margin-bottom: 10px;
     font-size: 16px;
+    padding: 2px 5px;
 }
 #id_image{
     border: none;
@@ -514,7 +515,7 @@ footer{
 .add-plant-form textarea  {
     margin-bottom: 15px;
     line-height: 1.1em;
-    padding: 2px;
+    padding: 5px;
     font-size: 16px;
     color: #373737;
     border-radius: 10px;
@@ -564,6 +565,7 @@ footer{
     margin-left: 10px;
     font-style: italic;
     overflow: hidden;
+    font-size: 14px;
 }
 /* ---------------------------------------------------------- */
 /*                       plant detail                         */
@@ -852,6 +854,9 @@ footer{
 .form-group textarea{
     border: 1px solid #b5b5b5;
     border-radius: 5px;
+}
+.save-button{
+    font-size: 16px;
 }
 /* ---------------------------------- */
 /*            weather tip             */

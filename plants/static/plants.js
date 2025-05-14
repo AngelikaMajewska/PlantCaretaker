@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const url = this.dataset.url;
             if (!csrfToken) return;
             sendForm(url,formData,data => {
-                if (data.diagnosis) alert("Rating:"+ data.diagnosis.rating +"\nDiagnosis:\n" + data.diagnosis.note);
+                if (data.diagnosis) alert("Rating: "+ data.diagnosis.rating +"\n\nDiagnosis:\n" + data.diagnosis.note);
                 else if (data.error) alert("Error:\n" + data.error);
                 else alert("Failed to get answer.");
                 const modal = document.getElementById('diagnoseModal');
@@ -281,7 +281,14 @@ document.addEventListener("DOMContentLoaded", function() {
     if(fileInput && fileNameSpan)
     {
        fileInput.addEventListener('change', function () {
-          fileNameSpan.textContent = this.files.length > 0 ? this.files[0].name : 'No file chosen';
+           let name=""
+           if (this.files[0].name.length >30){
+               name = this.files[0].name.slice(0,30) + "..." + this.files[0].name.slice(this.files[0].name.length - 5,this.files[0].name.length)
+           }
+           else {
+               name = this.files[0].name
+           }
+          fileNameSpan.textContent = this.files.length > 0 ? name : 'No file chosen';
        });
     }
     const checkButton = document.querySelector('.check-button');
