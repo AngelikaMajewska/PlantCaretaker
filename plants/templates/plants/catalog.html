@@ -29,7 +29,7 @@
                     {% if plant.image %}
                         <a href="{% url 'plant-detail' plant.pk %}"><img src="{{ plant.image.url }}" alt="{{ plant.name }}"></a>
                     {% else %}
-                        <a href="{% url 'plant-detail' plant.pk %}"><img src="/static/images/default-plant.png" alt="Default plant image"></a>
+                        <a href="{% url 'plant-detail' plant.pk %}"><img src="/static/images/flower.png" alt="Default plant image"></a>
                     {% endif %}
                 </div>
                 <div class="plant-name" >

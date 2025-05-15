@@ -1,6 +1,117 @@
 {% extends 'plants/base.html' %}
+{% load static %}
 {% block title %}Homepage{% endblock %}
 
 {% block content %}
-<p>Hi</p>
+    <div class="all-home">
+        <h2 class="title section-header">Meet The Plant Caretaker App</h2>
+        <div class="section0">
+            <div class="app-image6 app-image">
+                <img src="{% static 'images/dashboard.png' %}" alt="AI diagnosis box" />
+            </div>
+        </div>
+        <p class="section-header big-caption">One dashboard - many possibilities</p>
+        <div class="section1">
+            <div class="subsection1">
+                <div class="image-slider">
+                    <img id="slider-image" src="image1.jpg" alt="Slide" />
+                
+                    <div class="arrow left" onclick="prevSlide()">&#10094;</div>
+                    <div class="arrow right" onclick="nextSlide()">&#10095;</div>
+                </div>
+                <div class="image-caption">
+                    <p id="slider-caption" class="section-header">Manage and track watering of all your plants</p>
+                </div>
+            </div>
+        </div>
+        <div class="section2">
+            <div class="subsection3">
+                <div class="description3">
+                    <p class="big-caption section-header">Catalog</p>
+                    <p class="small-caption section-header">For users without account, you can use it as a source of information. Once you log in. you can also add plants to the wishlist, remove them from it and see which of the cataloged plants you already have. </p>
+                </div>
+                <div class="app-image3 app-image">
+                    <img src="{% static 'images/catalog-part.png' %}" alt="A part of catalog" />
+                </div>
+                <p class="small-caption section-header">Open any plant and see all the details you need to take care of it. You can also download all this information in the PDF format. </p>
+                <div class="app-image7 app-image">
+                    <img src="{% static 'images/plant-detail.png' %}" alt="A part of catalog" />
+                </div>
+            </div>
+            <div class="subsection6">
+                <div class="description6">
+                    <p class="big-caption section-header">See all the data of each owned plant collected in one place.</p>
+                    <p class="small-caption section-header">Each plant from the list of your owned plants has its separate page to track the watering, fertilizing and make notes.
+                    No matter how many plants you have, you can easily focus on the needs of each of them without forgetting your observations.</p>
+                </div>
+                <div class="app-image7 app-image">
+                    <img src="{% static 'images/owned-plant.png' %}" alt="A part of dashboard" />
+                </div>
+            </div>
+        </div>
+        <div class="section3">
+            <h2 class="big-caption section-header">AI features that can save the day</h2>
+            <p class="small-caption section-header">With this feature implemented, you can send the image of your plant to get AI generated diagnosis
+            that can help you find a root cause of the issues your beloved plant experiences.</p>
+            <div class="app-image7 app-image">
+                <img src="{% static 'images/ai-diagnose.png' %}" alt="AI diagnosis box" />
+            </div>
+            <p class="small-caption section-header">Use of AI doesn't end here. Give it a picture of a plant you don't know the name of and let AI give its own guesses what that might me.</p>
+            <div class="app-image8 app-image">
+                <img src="{% static 'images/guess-plant.png' %}" alt="AI diagnosis box" />
+            </div>
+        </div>
+        <div class="section4">
+            <h2 class="big-caption section-header">Calendar</h2>
+            <p class="small-caption section-header">See all your planned events and keep finished ones just below. Check without a hassle what already happened and do not worry about repeating some task. </p>
+            <div class="app-image9 app-image" >
+                <img src="{% static 'images/calendar.png' %}" alt="AI diagnosis box" />
+            </div>
+            <p class="small-caption section-header" style="margin-top: 0">Add any event to the calendar and if you want - link it to the plant. </p>
+            <div class="app-image10 app-image">
+                <img src="{% static 'images/add-event.png' %}" alt="AI diagnosis box" />
+            </div>
+        </div>
+    </div>
+<script>
+    const images = [
+        'static/images/watering-schedule.png',
+        'static/images/weather-tip.png',
+        'static/images/random-tips.png',
+        'static/images/owned-plants.png',
+        'static/images/wishlist.png',
+        'static/images/pdf-month.png',
+    ];
+
+    const captions = [
+        'Manage watering of all your plants.',
+        'Get personalised tips based on your set location...',
+        '... and tips you might already know, but can be useful to be reminded of.',
+        'Keep an eye on the plants you already have.',
+        'Don\'t forget about the plants you want.',
+        'Generate PDF with a plan for a current month.'
+    ];
+
+    let currentIndex = 0;
+
+    function showImage(index) {
+        const img = document.getElementById('slider-image');
+        const caption = document.getElementById('slider-caption');
+
+        img.src = images[index];
+        caption.textContent = captions[index];
+    }
+
+    function prevSlide() {
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        showImage(currentIndex);
+    }
+
+    function nextSlide() {
+        currentIndex = (currentIndex + 1) % images.length;
+        showImage(currentIndex);
+    }
+
+    window.onload = () => showImage(currentIndex);
+</script>
 {% endblock %}
