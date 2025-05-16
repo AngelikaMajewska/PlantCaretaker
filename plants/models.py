@@ -150,13 +150,6 @@ class WishList(models.Model):
     def __str__(self):
         return f"{self.owner}, {self.plant}"
 
-class PlantUserPhotos(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    plant = models.ForeignKey(Plant, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='plant_user_images/', null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.owner}, {self.plant}"
 
 class PlantTips(models.Model):
     tip=models.TextField()
