@@ -372,7 +372,6 @@ footer{
     flex-direction: row;
     align-content: center;
     justify-content:end;
-    width:10%;
     padding:0;
 }
 .user-event-header-buttons p{
@@ -1560,7 +1559,7 @@ footer{
     overflow: hidden;
     border-radius: 10px;
     align-self: center;
-    margin: 0 auto;
+    margin: 0 auto 10px auto;
 }
 
 .app-image img{
@@ -1571,11 +1570,10 @@ footer{
     margin: 0 auto;
 }
 .app-image3{
-    width: 600px;
-    height: 400px;
+    height: 450px;
 }
 .app-image6{
-    height: 500px;
+    height: 600px;
 }
 .app-image7{
     width: 1100px;
@@ -1599,7 +1597,7 @@ footer{
 .image-slider {
     position: relative;
     width: 800px;
-    height: 320px;
+    height: 360px;
     margin: auto;
     overflow: hidden;
     border-radius: 10px;
@@ -1657,7 +1655,6 @@ footer{
 }
 #slider-caption{
     font-size: 30px;
-    font-weight: bold;
     text-wrap: wrap;
     align-self: center;
 }
@@ -1677,10 +1674,13 @@ footer{
     margin-top:0;
 }
 .big-caption{
-    font-size: 30px;
+    font-size: 36px;
     font-weight: bold;
     text-wrap: wrap;
     align-self: center;
+    text-align: center;
+    margin-top:40px;
+    margin-bottom: 20px;
 }
 .small-caption{
     font-size: 24px;
@@ -1688,7 +1688,7 @@ footer{
     align-self: center;
     text-align: center;
     width: 80%;
-    margin: 30px auto;
+    margin: 10px auto 30px auto;
 }
 .subsection3{
     display: flex;
