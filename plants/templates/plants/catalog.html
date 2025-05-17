@@ -4,8 +4,8 @@
 {% block content %}
 <div class="catalog">
     {% if can_diagnose %}
-        <div class="diagnosis-box">
-            <h3 class="section-header">Guess the plant</h3>
+        <div class="diagnosis-box tile-background">
+            <h3 class="section-header">Identify the plant</h3>
             <p>If you can't find the name of a plant in the catalog below, upload its picture here, and AI will identify it for you.</p>
             <button class="check-button all-buttons big-button">Upload</button>
             <div style="display: block;align-self:center;">
@@ -19,8 +19,11 @@
                     </form>
                 </div>
             </div>
-            <h2 class="section-header">Catalog</h2>
+            
         </div>
+    {% endif %}
+    {% if can_diagnose %}
+    <h2 class="section-header">Catalog</h2>
     {% endif %}
     <div class="plant-list">
         {% for plant in plants %}
