@@ -98,7 +98,8 @@ PlantCaretaker/
 <img width="1165" alt="Zrzut ekranu 2025-05-16 o 18 12 55" src="https://github.com/user-attachments/assets/1faf9f58-9554-4aa6-b0f4-de283c6d3a51" />
 
 ### Catalog
-<img width="1066" alt="Zrzut ekranu 2025-05-16 o 18 13 39" src="https://github.com/user-attachments/assets/8768057f-47ab-4840-a5b5-aa15e8aa9f26" />
+<img width="1153" alt="image" src="https://github.com/user-attachments/assets/4fb5d192-9e23-4526-8d70-e7d477510f01" />
+
 
 ### Calendar
 <img width="1302" alt="Zrzut ekranu 2025-05-16 o 18 14 28" src="https://github.com/user-attachments/assets/90a56de0-e239-4f1f-b41e-9047aae0640b" />
