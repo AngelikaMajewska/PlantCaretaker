@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from datetime import date, timedelta, timezone, datetime
-import re
+from django_countries.fields import CountryField
 
 LIGHT_TYPES = (
     (0,'Unknown'),
@@ -160,6 +160,6 @@ class PlantTips(models.Model):
 class UserLocation(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
     city=models.CharField(max_length=100)
-    country=models.CharField(max_length=100, null=True, blank=True)
+    country=CountryField(max_length=100, default='', blank=True, null=True)
     def __str__(self):
         return f"{self.user}, {self.city}, {self.country}"

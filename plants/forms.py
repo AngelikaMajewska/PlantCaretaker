@@ -6,6 +6,8 @@ from rest_framework.exceptions import ValidationError
 from .models import Plant, Event, OwnedPlants, Watering, UserLocation
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django_countries.widgets import CountrySelectWidget
+
 
 class PlantForm(forms.ModelForm):
     class Meta:
@@ -87,6 +89,6 @@ class UserLocationForm(forms.ModelForm):
         model = UserLocation
         fields = ['country', 'city']
         widgets = {
-            'country': forms.TextInput(attrs={'class': 'form-input'}),
+            'country': CountrySelectWidget(attrs={'class': 'form-control'}),
             'city': forms.TextInput(attrs={'class': 'form-input'}),
         }
