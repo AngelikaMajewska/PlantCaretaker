@@ -23,10 +23,9 @@
                 {% if user.is_staff %}
                 <li><a href="{% url 'addplant' %}">Add plant</a></li>
                 {% endif %}
-                <li><a href="{% url 'calendar' %}">Calendar</a></li>
-        <!--        {% if user.is_authenticated %}-->
-        <!--            <li><a href="#">Dashboard</a></li>-->
-        <!--        {% endif %}-->
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'calendar' %}">Calendar</a></li>
+                {% endif %}
             </ul>
             <div class="login-logout">
                 {% if not user.is_authenticated %}
